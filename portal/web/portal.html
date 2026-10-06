@@ -299,7 +299,8 @@ input.changed { border-color: var(--accent); background: var(--accent-soft); }
     confidence: "Claude no está seguro de algún dato leído", totals_add_up: "Los totales no cuadran", itbis_rate: "El ITBIS no corresponde al 18% o 16%",
     issuer_rnc_valid: "RNC del emisor con problema", buyer_rnc_valid: "RNC del comprador con problema", ncf_format: "NCF con formato inválido",
     required_fields: "Faltan datos", date_valid: "Fecha fuera de rango", currency: "Falta la tasa del Banco Central", known_supplier: "Suplidor nuevo",
-    direction_valid: "No se sabe si es venta o compra", no_duplicate: "Factura repetida", rnc_registry_missing: "El RNC no aparece en el registro de la DGII"
+    direction_valid: "No se sabe si es venta o compra", no_duplicate: "Factura repetida", rnc_registry_missing: "El RNC no aparece en el registro de la DGII",
+    buyer_is_us: "La factura no está a nombre de su empresa", unverified_upload: "e-CF subido a mano: confirme que es auténtico"
   };
   const CHECKS = { powerbi_refresh: "Actualización de Power BI", ventas_del_dia: "Ventas del día", compras_del_dia: "Compras del día", normal_volume: "Cantidad de facturas normal" };
   const DOCSTATUS = { pending: ["Pendiente", "info"], retry: ["Se reintenta esta noche", "warn"], extracted: ["Leído", "ok"], failed: ["No se pudo leer", "bad"] };

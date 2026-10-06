@@ -266,7 +266,9 @@ def create_app(registry: ClientRegistry, context_factory: Callable[[ClientRegist
         if ctx.config.rls_enabled and not who.upn:
             raise HTTPException(403, "your account has no user name for row-level security")
         with ctx.engine.connect() as conn:
-            since = datetime.now(timezone.utc).replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)
+            # the limit resets at Dominican midnight; created_at is stored in UTC
+            local_midnight = datetime.now(settings.TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+            since = local_midnight.astimezone(timezone.utc).replace(tzinfo=None)
             asked_today = conn.execute(select(func.count()).select_from(assistant_messages).where(
                 assistant_messages.c.user_id == who.user_id, assistant_messages.c.role == "user",
                 assistant_messages.c.created_at >= since)).scalar() or 0

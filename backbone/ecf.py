@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
+from .validation import invoice_direction
+
 
 class ECFError(ValueError):
     pass
@@ -107,8 +109,7 @@ def parse_ecf(xml_bytes: bytes, own_rnc: str) -> dict:
             "amount": _text(item, "MontoItem"),
         })
 
-    own = "".join(ch for ch in own_rnc if ch.isdigit())
-    direction = "sale" if issuer == own else "purchase"
+    direction = invoice_direction(issuer, encf, own_rnc)
 
     return {
         "direction": direction,

@@ -51,6 +51,7 @@ class ValidationContext:
     fx_rates: dict[date, Decimal] = field(default_factory=dict)
     rnc_registry: dict[str, str] | None = None  # {rnc: DGII status} for the RNCs in this batch; None = not loaded
     known_suppliers: set[str] | None = None     # None = do not require known suppliers
+    own_rnc: str | None = None                  # the client's RNC; None = skip the buyer check
 
 
 # ---------- helpers ----------
@@ -95,6 +96,21 @@ def normalize_ncf(v) -> str | None:
         return None
     s = re.sub(r"[\s\-]", "", str(v)).upper()
     return s or None
+
+
+# Comprobantes the company issues itself for what it buys (compras, gastos menores, pagos al exterior):
+# the company is the issuer, but they are expenses, not sales.
+SELF_ISSUED_PURCHASE_TYPES = {"B11", "B13", "B17", "E41", "E43", "E47"}
+# Crédito fiscal: the buyer's RNC must be on it, so a purchase without our RNC is not ours to book.
+BUYER_REQUIRED_TYPES = {"B01", "E31"}
+
+
+def invoice_direction(issuer_rnc, ncf, own_rnc) -> str:
+    """'sale' when we issued it, except the self-issued purchase types; everything else is a purchase."""
+    t = ncf_type(normalize_ncf(ncf) or "")
+    if t in SELF_ISSUED_PURCHASE_TYPES:
+        return "purchase"
+    return "sale" if clean_rnc(issuer_rnc) and clean_rnc(issuer_rnc) == clean_rnc(own_rnc) else "purchase"
 
 
 def ncf_type(ncf: str) -> str | None:
@@ -146,6 +162,18 @@ def validate_invoice(row: dict, ctx: ValidationContext) -> Decision:
     if ncf:
         add("ncf_format", "pass" if ncf_type(ncf) else "review", "" if ncf_type(ncf) else f"{ncf} is not a valid NCF/e-NCF")
 
+    # 3b. a purchase must be addressed to us (someone else's invoice must not inflate our purchases and ITBIS credit)
+    own = clean_rnc(ctx.own_rnc)
+    if own and row.get("direction") == "purchase" and issuer != own and ncf_type(ncf) not in SELF_ISSUED_PURCHASE_TYPES:
+        if buyer and buyer != own:
+            add("buyer_is_us", "review", f"buyer RNC {buyer} is not this company ({own})")
+        elif not buyer and ncf_type(ncf) in BUYER_REQUIRED_TYPES:
+            add("buyer_is_us", "review", f"{ncf_type(ncf)} without the buyer's RNC cannot be booked as our purchase")
+
+    # 3c. e-CF XML uploaded by hand: its signature is not checked, so a person confirms it
+    if row.get("source") == "portal_xml":
+        add("unverified_upload", "review", "e-CF XML uploaded in the portal; signature and DGII acceptance not checked")
+
     # 4. totals add up
     sub, itbis, total = to_decimal(row.get("subtotal")), to_decimal(row.get("itbis")) or Decimal(0), to_decimal(row.get("total"))
     other, tip = to_decimal(row.get("other_taxes")) or Decimal(0), to_decimal(row.get("tip")) or Decimal(0)
@@ -161,11 +189,12 @@ def validate_invoice(row: dict, ctx: ValidationContext) -> Decision:
         ok = abs(itbis - expected) <= TOLERANCE
         add("itbis_rate", "pass" if ok else "review", "" if ok else f"ITBIS {itbis} vs expected {expected}")
     elif taxable is not None:
-        ok = itbis == 0 or any(abs(itbis - taxable * r) <= TOLERANCE for r in ITBIS_RATES)
+        ok = (itbis == 0 and taxable == 0) or any(abs(itbis - taxable * r) <= TOLERANCE for r in ITBIS_RATES)
         add("itbis_rate", "pass" if ok else "review", "" if ok else f"ITBIS {itbis} is not 18%/16% of {taxable}")
     elif sub is not None:
-        ok = itbis <= sub * Decimal("0.18") + TOLERANCE
-        add("itbis_rate", "pass" if ok else "review", "" if ok else f"ITBIS {itbis} above 18% of subtotal")
+        # same sign as the subtotal (credit notes are negative) and at most 18% of it
+        ok = abs(itbis) <= abs(sub) * Decimal("0.18") + TOLERANCE and (itbis == 0 or (itbis > 0) == (sub > 0))
+        add("itbis_rate", "pass" if ok else "review", "" if ok else f"ITBIS {itbis} is not between 0 and 18% of subtotal {sub}")
 
     # 6. duplicates -> reject
     if issuer and ncf and (issuer, ncf) in ctx.existing_keys:

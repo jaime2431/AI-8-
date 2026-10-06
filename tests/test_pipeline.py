@@ -19,6 +19,7 @@ CSV = (
 
 def fake_reader(claude, model, data, media_type, direction="purchase"):
     return {"direction": "purchase", "issuer_rnc": "132567897", "issuer_name": "Taller Gomez", "ncf": "B0100000777",
+            "buyer_rnc": "131000002",
             "issue_date": "2026-10-02", "currency": "DOP", "subtotal": Decimal("2000"), "itbis": Decimal("360"),
             "total": Decimal("2360"), "confidence": {"total": 0.97, "ncf": 0.62}}   # unsure about the NCF
 

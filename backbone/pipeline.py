@@ -29,7 +29,8 @@ from .db import (audit, business_today, clean_invoices, connector_state, documen
                  pipeline_runs, review_queue, staging_invoices, utcnow)
 from .ecf import parse_ecf
 from .notify import ConsoleNotifier, Notifier
-from .validation import ValidationContext, clean_rnc, ncf_type, normalize_ncf, to_decimal, validate_invoice
+from .validation import (ValidationContext, clean_rnc, invoice_direction, ncf_type, normalize_ncf, to_decimal,
+                         validate_invoice)
 
 XML_TYPES = {"application/xml", "text/xml"}
 
@@ -37,7 +38,7 @@ INVOICE_FIELDS = ("direction", "issuer_rnc", "issuer_name", "buyer_rnc", "ncf", 
                   "subtotal", "taxable_amount", "itbis", "expected_itbis", "other_taxes", "tip", "total", "branch")
 CREDIT_NOTE_TYPES = {"B04", "E34"}     # notas de crédito: stored as negative amounts so totals net out
 MONEY_FIELDS = {"subtotal", "taxable_amount", "itbis", "expected_itbis", "other_taxes", "tip", "total"}
-HUMAN_OVERRIDABLE = {"confidence", "known_supplier", "rnc_registry_missing"}   # a person can confirm these; never duplicates or totals
+HUMAN_OVERRIDABLE = {"confidence", "known_supplier", "rnc_registry_missing", "unverified_upload"}   # a person can confirm these; never duplicates or totals
 # Column widths of staging_invoices: values are checked here so one bad value never aborts a batch on SQL Server
 TEXT_LIMITS = {"issuer_rnc": 11, "buyer_rnc": 11, "ncf": 13, "ncf_modified": 13, "currency": 3, "direction": 10,
                "issuer_name": 255, "branch": 100}
@@ -86,11 +87,7 @@ def stage_rows(conn: Connection, rows, source: str, document_id: int | None = No
             v = values.get(f)
             if isinstance(v, str) and len(v) > limit:
                 values[f] = v[:limit] if f in ("issuer_name", "branch") else None
-        if values["ncf"] and ncf_type(values["ncf"]) in CREDIT_NOTE_TYPES:
-            for f in MONEY_FIELDS:
-                v = to_decimal(values.get(f))
-                if v is not None and v > 0:
-                    values[f] = -v
+        _sign_credit_note(values)
         if isinstance(values["issue_date"], str):
             try:
                 values["issue_date"] = date.fromisoformat(values["issue_date"])
@@ -106,6 +103,15 @@ def stage_rows(conn: Connection, rows, source: str, document_id: int | None = No
         except Exception as e:                               # one unsaveable row never loses the batch
             audit(conn, "system", "stage_error", {"source": source, "ref": row.get("source_ref"), "error": str(e)[:500]})
     return n
+
+
+def _sign_credit_note(values: dict) -> None:
+    """Credit notes are stored negative so totals net out, whatever sign the source (or a reviewer) used."""
+    if values.get("ncf") and ncf_type(values["ncf"]) in CREDIT_NOTE_TYPES:
+        for f in MONEY_FIELDS:
+            v = to_decimal(values.get(f))
+            if v is not None and v > 0:
+                values[f] = -v
 
 
 def extract_sources(ctx: ClientContext) -> dict:
@@ -155,13 +161,15 @@ def process_documents(ctx: ClientContext, reader: Callable = read_document, retr
             if doc["media_type"] in XML_TYPES:
                 row = parse_ecf(data, ctx.config.own_rnc)        # an uploaded e-CF needs no AI
                 # (an uploaded acknowledgment raises NotAnInvoice and is marked failed with that reason)
+                # XML sent by hand through the portal is unsigned as far as we know: a person confirms it
+                source = "portal_xml" if doc["channel"] == "upload" else "document"
             else:
                 row = reader(ctx.claude, ctx.model_agent, data, doc["media_type"])
-                own = clean_rnc(ctx.config.own_rnc)
-                row["direction"] = "sale" if clean_rnc(row.get("issuer_rnc")) == own else "purchase"
+                row["direction"] = invoice_direction(row.get("issuer_rnc"), row.get("ncf"), ctx.config.own_rnc)
+                source = "document"
             row["source_ref"] = doc["filename"]
             with ctx.engine.begin() as conn:
-                stage_rows(conn, [row], "document", doc["id"])
+                stage_rows(conn, [row], source, doc["id"])
                 conn.execute(update(documents).where(documents.c.id == doc["id"]).values(status="extracted"))
             ok += 1
         except Exception as e:
@@ -208,13 +216,14 @@ def build_validation_context(conn: Connection, ctx: ClientContext, today: date, 
         known = {r.rnc for r in conn.execute(select(master_suppliers.c.rnc))}
     return ValidationContext(today=today, open_period_start=ctx.config.open_period_start,
                              confidence_threshold=ctx.config.confidence_threshold,
-                             existing_keys=keys, fx_rates=rates, known_suppliers=known,
+                             existing_keys=keys, fx_rates=rates, known_suppliers=known, own_rnc=ctx.config.own_rnc,
                              rnc_registry=_registry_for(ctx, rncs) if rncs else None)
 
 
 def _row_for_validation(srow) -> dict:
     row = {f: srow[f] for f in INVOICE_FIELDS}
     row["confidence"] = json.loads(srow["confidence_json"] or "{}")
+    row["source"] = srow["source"]
     return row
 
 
@@ -230,7 +239,7 @@ def _load_clean(conn: Connection, srow, row: dict, vctx: ValidationContext, appr
         source=srow["source"], source_ref=srow["source_ref"], document_id=srow["document_id"],
         approved_by=approved_by, **values))
     vctx.existing_keys.add((row["issuer_rnc"], row["ncf"]))
-    if row.get("direction") == "purchase" and row.get("issuer_rnc"):
+    if row.get("direction") == "purchase" and row.get("issuer_rnc") and row["issuer_rnc"] != clean_rnc(vctx.own_rnc):
         if not conn.execute(select(master_suppliers.c.rnc).where(master_suppliers.c.rnc == row["issuer_rnc"])).first():
             conn.execute(insert(master_suppliers).values(rnc=row["issuer_rnc"], name=row.get("issuer_name")))
 
@@ -239,7 +248,7 @@ def _open_review_keys(conn: Connection) -> set[tuple[str, str]]:
     q = (select(staging_invoices.c.issuer_rnc, staging_invoices.c.ncf)
          .join(review_queue, review_queue.c.staging_id == staging_invoices.c.id)
          .where(review_queue.c.status == "open"))
-    return {(r.issuer_rnc, r.ncf) for r in conn.execute(q)}
+    return {(r.issuer_rnc, r.ncf) for r in conn.execute(q) if r.issuer_rnc and r.ncf}
 
 
 def promote(ctx: ClientContext, today: date) -> dict:
@@ -255,10 +264,11 @@ def promote(ctx: ClientContext, today: date) -> dict:
         for srow in new_rows:
             row = _row_for_validation(srow)
             key = (row.get("issuer_rnc"), row.get("ncf"))
+            keyed = bool(key[0] and key[1])       # rows missing RNC or NCF are not duplicates of each other
             already_known = key in vctx.existing_keys
             try:
                 with conn.begin_nested():
-                    if key in waiting:
+                    if keyed and key in waiting:
                         status, reason = "rejected", "same invoice already waiting in the review queue"
                         rules = [{"rule": "no_duplicate", "outcome": "reject", "message": reason}]
                     else:
@@ -271,7 +281,8 @@ def promote(ctx: ClientContext, today: date) -> dict:
                         _load_clean(conn, srow, row, vctx, "rules")
                     elif status == "review":
                         conn.execute(insert(review_queue).values(staging_id=srow["id"], reason=reason))
-                        waiting.add(key)
+                        if keyed:
+                            waiting.add(key)
                     else:
                         audit(conn, "rules", "row_rejected", {"staging_id": srow["id"], "reason": reason})
                 counts[status] += 1
@@ -289,7 +300,7 @@ def approve_review_item(ctx: ClientContext, item_id: int, user: str, corrections
                         today: date | None = None) -> dict:
     """A person approves (optionally correcting fields). Confidence and new-supplier flags are
     overridden by the human; every other rule must still pass."""
-    today = today or date.today()
+    today = today or business_today()
     with ctx.engine.begin() as conn:
         item = conn.execute(select(review_queue).where(review_queue.c.id == item_id)).mappings().first()
         if item is None or item["status"] != "open":
@@ -299,8 +310,11 @@ def approve_review_item(ctx: ClientContext, item_id: int, user: str, corrections
         for k, v in (corrections or {}).items():
             if k not in INVOICE_FIELDS:
                 continue
-            if k == "issue_date" and isinstance(v, str):
-                v = date.fromisoformat(v)          # ValueError -> the portal answers 422
+            if k == "issue_date":
+                if isinstance(v, str):
+                    v = date.fromisoformat(v)      # ValueError -> the portal answers 422
+                elif not isinstance(v, date):
+                    raise ValueError("issue_date must be a date like 2026-10-03")
             elif k in MONEY_FIELDS:
                 v = to_decimal(v)
             elif k in ("issuer_rnc", "buyer_rnc"):
@@ -308,6 +322,7 @@ def approve_review_item(ctx: ClientContext, item_id: int, user: str, corrections
             elif k == "ncf":
                 v = normalize_ncf(v)
             row[k] = v
+        _sign_credit_note(row)                     # a corrected amount or NCF must not flip a credit note positive
         vctx = build_validation_context(conn, ctx, today, {row.get("issuer_rnc"), row.get("buyer_rnc")})
         decision = validate_invoice(row, vctx)
         blocking = [r for r in decision.problems() if r.rule not in HUMAN_OVERRIDABLE]
