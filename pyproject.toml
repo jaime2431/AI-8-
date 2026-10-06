@@ -19,5 +19,15 @@ dependencies = [
 azure = ["azure-identity>=1.15", "azure-keyvault-secrets>=4.8", "pyodbc>=5.0"]
 dev = ["pytest>=8", "reportlab>=4.0"]
 
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["backbone*", "portal*", "infra*"]
+
+[tool.setuptools.package-data]
+portal = ["web/*.html"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
