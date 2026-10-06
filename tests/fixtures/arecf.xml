@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ARECF>
+  <DetalleAcusedeRecibo>
+    <Version>1.0</Version>
+    <RNCEmisor>401506254</RNCEmisor>
+    <RNCComprador>131000002</RNCComprador>
+    <eNCF>E310000005555</eNCF>
+    <Estado>0</Estado>
+  </DetalleAcusedeRecibo>
+</ARECF>

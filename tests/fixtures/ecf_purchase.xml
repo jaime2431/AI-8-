@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ECF xmlns="http://example.org/ecf">
+  <Encabezado>
+    <IdDoc>
+      <TipoeCF>31</TipoeCF>
+      <eNCF>E310000005555</eNCF>
+    </IdDoc>
+    <Emisor>
+      <RNCEmisor>401506254</RNCEmisor>
+      <RazonSocialEmisor>Distribuidora Caribe SA</RazonSocialEmisor>
+      <FechaEmision>02-10-2026</FechaEmision>
+    </Emisor>
+    <Comprador>
+      <RNCComprador>131000002</RNCComprador>
+    </Comprador>
+    <Totales>
+      <MontoGravadoTotal>5000.00</MontoGravadoTotal>
+      <MontoGravadoI1>3000.00</MontoGravadoI1>
+      <MontoGravadoI2>2000.00</MontoGravadoI2>
+      <TotalITBIS>860.00</TotalITBIS>
+      <MontoTotal>5860.00</MontoTotal>
+    </Totales>
+  </Encabezado>
+</ECF>

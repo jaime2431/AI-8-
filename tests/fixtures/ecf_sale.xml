@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ECF>
+  <Encabezado>
+    <Version>1.0</Version>
+    <IdDoc>
+      <TipoeCF>31</TipoeCF>
+      <eNCF>E310000000101</eNCF>
+    </IdDoc>
+    <Emisor>
+      <RNCEmisor>131000002</RNCEmisor>
+      <RazonSocialEmisor>Ferreteria Norte SRL</RazonSocialEmisor>
+      <FechaEmision>02-10-2026</FechaEmision>
+    </Emisor>
+    <Comprador>
+      <RNCComprador>101005009</RNCComprador>
+    </Comprador>
+    <Totales>
+      <MontoGravadoTotal>10000.00</MontoGravadoTotal>
+      <MontoGravadoI1>10000.00</MontoGravadoI1>
+      <MontoExento>0.00</MontoExento>
+      <TotalITBIS>1800.00</TotalITBIS>
+      <MontoTotal>11800.00</MontoTotal>
+    </Totales>
+  </Encabezado>
+  <DetallesItems>
+    <Item>
+      <NombreItem>Cemento gris 42.5kg</NombreItem>
+      <CantidadItem>20</CantidadItem>
+      <PrecioUnitarioItem>500.00</PrecioUnitarioItem>
+      <MontoItem>10000.00</MontoItem>
+    </Item>
+  </DetallesItems>
+</ECF>

@@ -1,0 +1,473 @@
+<title>Portal Datia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: app shell — top bar with the company and four tabs, one working area below, list/detail on wide screens */
+:root {
+  --bg: #f4f7f7;          /* paper with a faint larimar cast */
+  --surface: #ffffff;
+  --ink: #142a30;
+  --muted: #56707a;
+  --line: #d6e1e3;
+  --accent: #1f7f97;      /* larimar blue, the Dominican stone */
+  --accent-soft: #dcEEf2;
+  --good: #227a4f; --good-soft: #e0f1e7;
+  --warn: #a8650a; --warn-soft: #fbefd9;
+  --bad: #b23a33;  --bad-soft: #f8e1df;
+  --font-display: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1a1d; --surface: #16252a; --ink: #e3eef0; --muted: #93abb2; --line: #2a3e44;
+  --accent: #5cc0d8; --accent-soft: #1b3a43;
+  --good: #63c58f; --good-soft: #17352a; --warn: #e3aa4f; --warn-soft: #3a2c14; --bad: #ee7d74; --bad-soft: #3d1f1d;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1a1d; --surface: #16252a; --ink: #e3eef0; --muted: #93abb2; --line: #2a3e44;
+  --accent: #5cc0d8; --accent-soft: #1b3a43;
+  --good: #63c58f; --good-soft: #17352a; --warn: #e3aa4f; --warn-soft: #3a2c14; --bad: #ee7d74; --bad-soft: #3d1f1d;
+  color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.02rem; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbar-inner { max-width: 1160px; margin: 0 auto; padding: 12px 16px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand b { font-family: var(--font-display); font-size: 1.15rem; color: var(--accent); }
+.brand span { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.who { margin-left: auto; font-size: 0.85rem; }
+.tabs { flex-basis: 100%; display: flex; gap: 4px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 14px; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 600; color: var(--muted); white-space: nowrap; display: flex; gap: 8px; align-items: center; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.count { background: var(--warn-soft); color: var(--warn); border-radius: 999px; padding: 0 8px; font-size: 0.78rem; }
+
+main { max-width: 1160px; margin: 0 auto; padding: 24px 16px 48px; display: grid; gap: 20px; }
+.demo-note { background: var(--accent-soft); border-radius: var(--radius); padding: 10px 14px; font-size: 0.88rem; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; min-width: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 860px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 10px; font-size: 0.82rem; font-weight: 600; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.ok { background: var(--good-soft); color: var(--good); }
+.warn { background: var(--warn-soft); color: var(--warn); }
+.bad { background: var(--bad-soft); color: var(--bad); }
+.info { background: var(--accent-soft); color: var(--accent); }
+
+.night { display: grid; gap: 14px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stat { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; }
+.stat strong { display: block; font-family: var(--font-display); font-size: 1.7rem; line-height: 1.1; }
+.stat.is-warn { border-color: var(--warn); } .stat.is-ok { border-color: var(--good); } .stat.is-bad { border-color: var(--bad); }
+.checks { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.checks th { text-align: left; font-weight: 600; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.checks td { padding: 8px; border-bottom: 1px solid var(--line); }
+.checks td.r, .checks th.r { text-align: right; }
+.table-wrap { overflow-x: auto; }
+
+.report { display: grid; gap: 10px; }
+.report iframe { width: 100%; aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: var(--radius); max-width: 100%; }
+.report-demo { border: 1px dashed var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 10px; }
+.report-demo svg { width: 100%; height: auto; max-width: 100%; }
+
+.queue { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .queue { grid-template-columns: minmax(0, 1fr); } }
+.items { display: grid; gap: 8px; }
+.item { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; display: grid; gap: 4px; }
+.item[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.item .top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.reason { font-size: 0.85rem; color: var(--warn); }
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 520px) { .form { grid-template-columns: minmax(0, 1fr); } }
+label { display: grid; gap: 4px; font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+input[type="text"], input[type="date"], textarea { width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 8px 10px; font-size: 0.95rem; color: var(--ink); }
+input.changed { border-color: var(--accent); background: var(--accent-soft); }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 9px 16px; font-weight: 600; cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.btn.danger { color: var(--bad); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.message { border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; }
+.source { font-size: 0.82rem; }
+
+.drop { border: 2px dashed var(--line); border-radius: var(--radius); padding: 28px 16px; text-align: center; display: grid; gap: 8px; justify-items: center; }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.docs { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.docs td, .docs th { padding: 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.docs th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+
+.chat { display: grid; grid-template-rows: 1fr auto; gap: 12px; min-height: 420px; }
+.log { display: grid; gap: 10px; align-content: start; }
+.bubble { max-width: 70ch; padding: 10px 14px; border-radius: 12px; white-space: pre-wrap; }
+.bubble.user { justify-self: end; background: var(--accent); color: var(--surface); }
+.bubble.bot { justify-self: start; background: var(--bg); border: 1px solid var(--line); }
+.suggest { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: 0.88rem; }
+.ask { display: flex; gap: 8px; }
+.ask input { flex: 1; min-width: 0; }
+@media (prefers-reduced-motion: no-preference) { .bubble { animation: rise .18s ease-out; } @keyframes rise { from { transform: translateY(4px); opacity: .6; } } }
+</style>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><b>Datia</b><span id="company">Cargando…</span></div>
+    <div class="who muted" id="who"></div>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button class="tab" role="tab" id="tab-inicio" aria-selected="true" data-view="inicio">Inicio</button>
+      <button class="tab" role="tab" id="tab-revision" aria-selected="false" data-view="revision">Revisión <span class="count" id="queue-count" hidden></span></button>
+      <button class="tab" role="tab" id="tab-documentos" aria-selected="false" data-view="documentos">Documentos</button>
+      <button class="tab" role="tab" id="tab-asistente" aria-selected="false" data-view="asistente">Asistente</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="demo-note" id="demo-note" hidden>Vista de demostración con datos de ejemplo de una ferretería. Nada de lo que haga aquí se guarda.</div>
+
+  <!-- INICIO -->
+  <section id="view-inicio" class="grid-2">
+    <div class="panel report">
+      <div class="row" style="justify-content: space-between;">
+        <h2>Su reporte</h2>
+        <span class="muted source" id="report-source"></span>
+      </div>
+      <div id="report-slot"></div>
+    </div>
+    <div class="panel night" aria-live="polite">
+      <div class="row" style="justify-content: space-between;">
+        <h2>Revisión de anoche</h2>
+        <span id="run-pill"></span>
+      </div>
+      <p class="muted" id="run-when" style="margin: 0;"></p>
+      <div class="stats">
+        <div class="stat is-ok"><strong class="num" id="st-accepted">–</strong><span class="muted">facturas cargadas</span></div>
+        <div class="stat is-warn"><strong class="num" id="st-review">–</strong><span class="muted">por revisar</span></div>
+        <div class="stat is-bad"><strong class="num" id="st-rejected">–</strong><span class="muted">duplicadas</span></div>
+      </div>
+      <div class="table-wrap">
+        <table class="checks">
+          <thead><tr><th>Control</th><th class="r">Base limpia</th><th class="r">Power BI</th><th>Estado</th></tr></thead>
+          <tbody id="checks"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVISIÓN -->
+  <section id="view-revision" class="queue" hidden>
+    <div class="panel" style="display: grid; gap: 12px;">
+      <div><h2>Facturas por revisar</h2><p class="muted" style="margin: 4px 0 0;">Estas no pasaron una regla y esperan su visto bueno. Nada llega a Power BI sin aprobarse.</p></div>
+      <div class="items" id="items"></div>
+    </div>
+    <div class="panel" id="detail" style="display: grid; gap: 14px;"></div>
+  </section>
+
+  <!-- DOCUMENTOS -->
+  <section id="view-documentos" class="grid-2" hidden>
+    <div class="panel" style="display: grid; gap: 14px;">
+      <h2>Enviar facturas</h2>
+      <div class="drop" id="drop">
+        <strong>Arrastre aquí facturas en PDF, fotos o archivos e-CF (XML)</strong>
+        <span class="muted">Hasta 15 MB por archivo. Claude las lee esta noche y las revisa con las reglas.</span>
+        <label class="btn" for="file-input" style="color: var(--ink);">Elegir archivos</label>
+        <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.xml" hidden>
+      </div>
+      <div id="upload-msg"></div>
+      <p class="muted" style="margin: 0;">También puede enviarlas al correo o WhatsApp de su empresa en Datia.</p>
+    </div>
+    <div class="panel" style="display: grid; gap: 10px; min-width: 0;">
+      <h2>Recibidos</h2>
+      <div class="table-wrap">
+        <table class="docs"><thead><tr><th>Archivo</th><th>Canal</th><th>Estado</th></tr></thead><tbody id="docs"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASISTENTE -->
+  <section id="view-asistente" class="panel chat" hidden>
+    <div class="log" id="log" aria-live="polite">
+      <div class="bubble bot">Hola. Pregúnteme por sus ventas, compras, ITBIS o suplidores. Respondo con los datos de su Power BI y le digo el período de cada cifra.</div>
+      <div class="suggest" id="suggest"></div>
+    </div>
+    <form class="ask" id="ask-form">
+      <input type="text" id="ask-input" placeholder="Escriba su pregunta" aria-label="Su pregunta" autocomplete="off">
+      <button class="btn primary" type="submit" id="ask-btn">Preguntar</button>
+    </form>
+  </section>
+</main>
+
+<script>
+(() => {
+  const DEMO = window.DATIA_DEMO === true;
+  const $ = (id) => document.getElementById(id);
+  const money = (v) => v == null || v === "" ? "–" : "RD$" + Number(v).toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // ---------- demo data (example company, clearly marked) ----------
+  const demo = {
+    config: { company: "Ferretería Norte SRL (ejemplo)", user: "Ana Rodríguez", roles: ["Reviewer"], report_embed_url: null },
+    run: { run_date: "2026-10-03", finished_at: "2026-10-04T04:12:00", status: "passed",
+      stats_json: JSON.stringify({ accepted: 47, review: 3, rejected: 1 }),
+      qa_json: JSON.stringify([
+        { name: "powerbi_refresh", ok: true, db_value: null, pbi_value: null, note: "" },
+        { name: "ventas_del_dia", ok: true, db_value: "412380.50", pbi_value: "412380.50", note: "" },
+        { name: "compras_del_dia", ok: true, db_value: "158920.00", pbi_value: "158920.00", note: "" },
+        { name: "normal_volume", ok: true, db_value: "51", pbi_value: "48.6", note: "" } ]) },
+    queue: [
+      { id: 101, reason: "confidence: low confidence on ncf", ncf: "B0100004417", issuer_rnc: "132567897", issuer_name: "Taller Gómez", issue_date: "2026-10-03", subtotal: 2000, itbis: 360, total: 2360, currency: "DOP", source_ref: "foto_whatsapp_0931.jpg" },
+      { id: 102, reason: "totals_add_up: subtotal+ITBIS+other+tip differs from total by 409.00", ncf: "B0200000002", issuer_rnc: "131000002", issuer_name: "Caja 2, sucursal Villa Mella", issue_date: "2026-10-03", subtotal: 500, itbis: 90, total: 999, currency: "DOP", source_ref: "pos_2026-10-03.csv:3" },
+      { id: 103, reason: "issuer_rnc_valid: 401506254 has DGII status SUSPENDIDO", ncf: "E310000005555", issuer_rnc: "401506254", issuer_name: "Distribuidora Caribe SA", issue_date: "2026-10-03", subtotal: 5000, itbis: 860, total: 5860, currency: "DOP", source_ref: "E310000005555.xml" } ],
+    docs: [
+      { filename: "foto_whatsapp_0931.jpg", channel: "whatsapp", status: "extracted", received_at: "2026-10-03T16:40:00" },
+      { filename: "factura_cemex_octubre.pdf", channel: "email", status: "extracted", received_at: "2026-10-03T11:02:00" },
+      { filename: "recibo_borroso.jpg", channel: "whatsapp", status: "failed", received_at: "2026-10-03T09:15:00" },
+      { filename: "E310000000101.xml", channel: "upload", status: "extracted", received_at: "2026-10-02T17:30:00" } ],
+    answers: {
+      "¿Cuánto vendimos ayer?": "El viernes 3 de octubre de 2026 vendieron RD$412,380.50 en 51 facturas. Es 6% más que el promedio de los últimos 8 viernes (RD$389,100).",
+      "¿Quiénes fueron los 5 suplidores con más compras este mes?": "Octubre 2026, del 1 al 3:\n1. Cementos del Caribe: RD$84,200\n2. Distribuidora Caribe SA: RD$41,860\n3. Aceros Quisqueya: RD$19,300\n4. Pinturas Tropical: RD$8,940\n5. Taller Gómez: RD$4,620",
+      "¿Cuánto ITBIS cobramos en septiembre?": "En septiembre de 2026 el ITBIS de ventas fue RD$1,412,775.30, sobre ventas gravadas de RD$7,848,751.67."
+    }
+  };
+
+  // ---------- API ----------
+  let auth = null, pendingToken = null;
+  const never = new Promise(() => {});        // used after starting a redirect: nothing else should run
+  function token() {
+    if (!auth || auth.mode !== "entra") return Promise.resolve(null);
+    if (!pendingToken) {                       // one shared request, even when several calls start at once
+      const account = auth.msal.getActiveAccount();
+      pendingToken = auth.msal.acquireTokenSilent({ scopes: [auth.scope], account })
+        .then((r) => r.accessToken)
+        .catch(async (e) => {
+          if (e instanceof window.msal.InteractionRequiredAuthError) { await auth.msal.acquireTokenRedirect({ scopes: [auth.scope], account }); return never; }
+          throw e;
+        })
+        .finally(() => { setTimeout(() => { pendingToken = null; }, 0); });
+    }
+    return pendingToken;
+  }
+  async function api(path, opts = {}) {
+    if (DEMO) return demoApi(path, opts);
+    const headers = opts.headers || {};
+    if (auth?.mode === "dev") headers["X-Dev-Client"] = auth.client;
+    const t = await token(); if (t) headers.Authorization = "Bearer " + t;
+    const r = await fetch(path, { ...opts, headers });
+    const body = r.headers.get("content-type")?.includes("json") ? await r.json() : await r.text();
+    if (!r.ok) {
+      const d = body?.detail;
+      throw new Error(Array.isArray(d) ? d.map((x) => x.msg || JSON.stringify(x)).join("; ") : (d || "Error " + r.status));
+    }
+    return body;
+  }
+  async function demoApi(path, opts) {
+    await new Promise((res) => setTimeout(res, 250));
+    if (path === "/config") return demo.config;
+    if (path === "/runs/latest") return demo.run;
+    if (path === "/review-queue") return demo.queue;
+    if (path === "/documents" && (!opts.method || opts.method === "GET")) return demo.docs;
+    if (path === "/documents") { const f = opts.body.get("file"); demo.docs.unshift({ filename: f.name, channel: "upload", status: "pending", received_at: new Date().toISOString() }); return { document_id: 999, duplicate: false }; }
+    const m = path.match(/^\/review-queue\/(\d+)\/(approve|reject)$/);
+    if (m) {
+      const id = Number(m[1]); const item = demo.queue.find((q) => q.id === id);
+      if (m[2] === "approve") {
+        const c = JSON.parse(opts.body).corrections || {};
+        const sub = Number(c.subtotal ?? item.subtotal), itb = Number(c.itbis ?? item.itbis), tot = Number(c.total ?? item.total);
+        if (Math.abs(sub + itb - tot) > 1) return { approved: false, problems: [`totals_add_up: subtotal+ITBIS+other+tip differs from total by ${Math.abs(sub + itb - tot).toFixed(2)}`] };
+        if (item.reason.includes("SUSPENDIDO")) return { approved: false, problems: ["issuer_rnc_valid: 401506254 has DGII status SUSPENDIDO"] };
+      }
+      demo.queue = demo.queue.filter((q) => q.id !== id);
+      return m[2] === "approve" ? { approved: true, problems: [] } : { rejected: true };
+    }
+    if (path === "/ask") { const q = JSON.parse(opts.body).question; return { answer: demo.answers[q] || "En esta demostración solo respondo las preguntas sugeridas. Con sus datos reales, Claude consulta su Power BI para cualquier pregunta." }; }
+    throw new Error("no disponible en la demostración");
+  }
+
+  // ---------- plain-language labels ----------
+  const RULES = {
+    confidence: "Claude no está seguro de algún dato leído", totals_add_up: "Los totales no cuadran", itbis_rate: "El ITBIS no corresponde al 18% o 16%",
+    issuer_rnc_valid: "RNC del emisor con problema", buyer_rnc_valid: "RNC del comprador con problema", ncf_format: "NCF con formato inválido",
+    required_fields: "Faltan datos", date_valid: "Fecha fuera de rango", currency: "Falta la tasa del Banco Central", known_supplier: "Suplidor nuevo",
+    direction_valid: "No se sabe si es venta o compra", no_duplicate: "Factura repetida", rnc_registry_missing: "El RNC no aparece en el registro de la DGII"
+  };
+  const CHECKS = { powerbi_refresh: "Actualización de Power BI", ventas_del_dia: "Ventas del día", compras_del_dia: "Compras del día", normal_volume: "Cantidad de facturas normal" };
+  const DOCSTATUS = { pending: ["Pendiente", "info"], retry: ["Se reintenta esta noche", "warn"], extracted: ["Leído", "ok"], failed: ["No se pudo leer", "bad"] };
+  const CHANNEL = { whatsapp: "WhatsApp", email: "Correo", upload: "Portal", folder: "Carpeta" };
+  const explain = (reason) => reason.split("; ").map((p) => { const [rule, ...rest] = p.split(": "); return { label: RULES[rule] || rule, detail: rest.join(": ") }; });
+
+  // ---------- tabs ----------
+  const views = ["inicio", "revision", "documentos", "asistente"];
+  function show(view) {
+    views.forEach((v) => { $("view-" + v).hidden = v !== view; $("tab-" + v).setAttribute("aria-selected", String(v === view)); });
+    try { localStorage.setItem("datia-tab", view); } catch {}
+  }
+  document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => show(t.dataset.view)));
+
+  // ---------- inicio ----------
+  async function loadHome(cfg) {
+    const slot = $("report-slot");
+    if (cfg.report_embed_url) {
+      slot.innerHTML = `<iframe title="Reporte de Power BI" src="${esc(cfg.report_embed_url)}" allowfullscreen></iframe>`;
+      $("report-source").textContent = "Power BI";
+    } else {
+      $("report-source").textContent = DEMO ? "ejemplo" : "Power BI aún no conectado";
+      slot.innerHTML = `<div class="report-demo"><strong>Ventas diarias, últimos 14 días</strong>${sparkBars()}<span class="muted source">En el portal real aquí aparece su reporte de Power BI.</span></div>`;
+    }
+    const run = await api("/runs/latest");
+    if (!run || !run.status) { $("run-pill").innerHTML = `<span class="pill info">Sin revisiones aún</span>`; return; }
+    const stats = JSON.parse(run.stats_json || "{}"), checks = JSON.parse(run.qa_json || "[]");
+    const pills = { passed: ["Todo cuadra", "ok"], held: ["Resumen retenido", "warn"], failed: ["La revisión falló", "bad"], running: ["En curso", "info"] };
+    const [txt, cls] = pills[run.status] || [run.status, "info"];
+    $("run-pill").innerHTML = `<span class="pill ${cls}">${esc(txt)}</span>`;
+    const when = run.finished_at ? new Date(run.finished_at) : null;
+    $("run-when").textContent = `Facturas del ${new Date(run.run_date + "T12:00:00").toLocaleDateString("es-DO", { weekday: "long", day: "numeric", month: "long" })}` + (when ? ` · revisado a las ${when.toLocaleTimeString("es-DO", { hour: "2-digit", minute: "2-digit" })}` : "");
+    $("st-accepted").textContent = stats.accepted ?? 0; $("st-review").textContent = stats.review ?? 0; $("st-rejected").textContent = stats.rejected ?? 0;
+    $("checks").innerHTML = checks.map((c) => {
+      const isMoney = c.name !== "normal_volume";
+      const fmt = (v) => v == null ? "–" : isMoney ? money(v) : Number(v).toLocaleString("es-DO", { maximumFractionDigits: 1 });
+      return `<tr><td>${esc(CHECKS[c.name] || c.name)}</td><td class="r num">${fmt(c.db_value)}</td><td class="r num">${fmt(c.pbi_value)}</td><td>${c.ok ? '<span class="pill ok">Cuadra</span>' : `<span class="pill bad" title="${esc(c.note)}">Revisar</span>`}</td></tr>`;
+    }).join("");
+  }
+  function sparkBars() {
+    const vals = [318, 342, 296, 0, 361, 377, 389, 352, 330, 0, 371, 395, 401, 412];   // miles de RD$, domingos cerrados
+    const w = 560, h = 150, pad = 24, bw = (w - pad * 2) / vals.length, max = 450;
+    const bars = vals.map((v, i) => { const bh = v / max * (h - 40); return `<rect x="${pad + i * bw + 3}" y="${h - 20 - bh}" width="${bw - 6}" height="${bh}" rx="3" fill="var(--accent)" fill-opacity="${i === vals.length - 1 ? 1 : 0.35}"><title>${v} mil RD$</title></rect>`; }).join("");
+    return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Ventas diarias de ejemplo"><line x1="${pad}" x2="${w - pad}" y1="${h - 20}" y2="${h - 20}" stroke="var(--line)"/>${bars}<text x="${w - pad}" y="14" text-anchor="end" font-size="12" fill="var(--muted)">ayer RD$412 mil</text></svg>`;
+  }
+
+  // ---------- revisión ----------
+  let queue = [], current = null, roles = [];
+  async function loadQueue() {
+    queue = await api("/review-queue");
+    $("queue-count").hidden = queue.length === 0; $("queue-count").textContent = queue.length;
+    $("items").innerHTML = queue.length ? queue.map((q) => `
+      <button class="item" data-id="${q.id}" aria-current="${q.id === current}">
+        <div class="top"><span class="mono">${esc(q.ncf || "sin NCF")}</span><span class="num">${money(q.total)}</span></div>
+        <span>${esc(q.issuer_name || q.issuer_rnc || "")}</span>
+        <span class="reason">${explain(q.reason).map((e) => esc(e.label)).join(" · ")}</span>
+      </button>`).join("") : `<p class="muted">No hay facturas pendientes. Todo lo recibido pasó las reglas.</p>`;
+    document.querySelectorAll(".item").forEach((b) => b.addEventListener("click", () => select(Number(b.dataset.id))));
+    if (!queue.find((q) => q.id === current)) current = queue[0]?.id ?? null;
+    renderDetail();
+  }
+  function select(id) { current = id; document.querySelectorAll(".item").forEach((b) => b.setAttribute("aria-current", String(Number(b.dataset.id) === id))); renderDetail(); }
+  const FIELDS = [["ncf", "NCF / e-NCF", "text"], ["issuer_rnc", "RNC del emisor", "text"], ["issue_date", "Fecha", "date"], ["subtotal", "Subtotal (RD$)", "text"], ["itbis", "ITBIS (RD$)", "text"], ["total", "Total (RD$)", "text"]];
+  function renderDetail() {
+    const d = $("detail"); const q = queue.find((x) => x.id === current);
+    if (!q) { d.innerHTML = `<h2>Nada que revisar</h2><p class="muted" style="margin:0;">Cuando una factura no pase una regla aparecerá aquí con la razón.</p>`; return; }
+    const reviewer = roles.includes("Reviewer");
+    d.innerHTML = `
+      <div><h2>${esc(q.issuer_name || "Factura")}</h2><p class="muted source" style="margin:4px 0 0;">Origen: <span class="mono">${esc(q.source_ref || "")}</span></p></div>
+      <div style="display:grid;gap:6px;">${explain(q.reason).map((e) => `<div class="message warn"><strong>${esc(e.label)}.</strong> <span class="mono" style="font-size:.82rem;">${esc(e.detail)}</span></div>`).join("")}</div>
+      <form id="fix" class="form">${FIELDS.map(([k, label, type]) => `<label for="f-${k}">${label}<input id="f-${k}" name="${k}" type="${type}" class="${k === "ncf" || k === "issuer_rnc" ? "mono" : "num"}" value="${esc(q[k] ?? "")}" data-orig="${esc(q[k] ?? "")}" ${reviewer ? "" : "disabled"}></label>`).join("")}</form>
+      <div id="act-msg"></div>
+      <div class="row">
+        <button class="btn primary" id="approve" ${reviewer ? "" : "disabled"}>Aprobar y cargar</button>
+        <button class="btn danger" id="reject" ${reviewer ? "" : "disabled"}>Rechazar</button>
+        ${reviewer ? "" : '<span class="muted">Solo los revisores de su empresa pueden aprobar.</span>'}
+      </div>
+      <div id="reject-box" hidden style="display:grid;gap:8px;">
+        <label for="reject-note">¿Por qué se rechaza?<textarea id="reject-note" rows="2" placeholder="Ej.: factura anulada por el suplidor"></textarea></label>
+        <div class="row"><button class="btn danger" id="reject-confirm">Confirmar rechazo</button><button class="btn" id="reject-cancel">Cancelar</button></div>
+      </div>`;
+    d.querySelectorAll("#fix input").forEach((i) => i.addEventListener("input", () => i.classList.toggle("changed", i.value !== i.dataset.orig)));
+    $("approve").addEventListener("click", approve);
+    $("reject").addEventListener("click", () => { $("reject-box").hidden = false; $("reject-note").focus(); });
+    $("reject-cancel")?.addEventListener("click", () => { $("reject-box").hidden = true; });
+    $("reject-confirm")?.addEventListener("click", reject);
+  }
+  async function approve() {
+    const corrections = {};
+    document.querySelectorAll("#fix input").forEach((i) => { if (i.value !== i.dataset.orig) corrections[i.name] = i.value.trim(); });
+    $("approve").disabled = true;
+    try {
+      const r = await api(`/review-queue/${current}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ corrections }) });
+      if (r.approved) { flash("Aprobada. Se carga a Power BI en la próxima actualización."); await loadQueue(); }
+      else { $("act-msg").innerHTML = `<div class="message bad">Todavía no se puede cargar. ${explain(r.problems.join("; ")).map((e) => `<strong>${esc(e.label)}:</strong> <span class="mono">${esc(e.detail)}</span>`).join("<br>")}<br>Corrija el dato o rechace la factura.</div>`; $("approve").disabled = false; }
+    } catch (e) { $("act-msg").innerHTML = `<div class="message bad">${esc(e.message)}</div>`; $("approve").disabled = false; }
+  }
+  async function reject() {
+    try { await api(`/review-queue/${current}/reject`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: $("reject-note").value }) }); flash("Rechazada. No se cargará."); await loadQueue(); }
+    catch (e) { $("act-msg").innerHTML = `<div class="message bad">${esc(e.message)}</div>`; }
+  }
+  function flash(text) { const d = $("detail"); const n = document.createElement("div"); n.className = "message ok"; n.textContent = text; d.prepend(n); setTimeout(() => n.remove(), 4000); }
+
+  // ---------- documentos ----------
+  async function loadDocs() {
+    const docs = await api("/documents");
+    $("docs").innerHTML = docs.length ? docs.map((d) => { const [t, c] = DOCSTATUS[d.status] || [d.status, "info"]; return `<tr><td class="mono" style="word-break:break-all;">${esc(d.filename)}</td><td>${esc(CHANNEL[d.channel] || d.channel)}</td><td><span class="pill ${c}">${esc(t)}</span></td></tr>`; }).join("") : `<tr><td colspan="3" class="muted">Aún no ha enviado documentos.</td></tr>`;
+  }
+  async function upload(files) {
+    const out = [];
+    for (const f of files) {
+      if (f.size > 15 * 1024 * 1024) { out.push(`${f.name}: pesa más de 15 MB`); continue; }
+      const fd = new FormData(); fd.append("file", f);
+      try { const r = await api("/documents", { method: "POST", body: fd }); out.push(r.duplicate ? `${f.name}: ya lo habíamos recibido` : `${f.name}: recibido`); }
+      catch (e) { out.push(`${f.name}: ${e.message}`); }
+    }
+    $("upload-msg").innerHTML = `<div class="message info">${out.map(esc).join("<br>")}</div>`;
+    loadDocs();
+  }
+  const drop = $("drop");
+  ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", (e) => upload([...e.dataTransfer.files]));
+  $("file-input").addEventListener("change", (e) => upload([...e.target.files]));
+
+  // ---------- asistente ----------
+  const SUGGEST = Object.keys(demo.answers);
+  $("suggest").innerHTML = SUGGEST.map((s) => `<button class="chip" type="button">${esc(s)}</button>`).join("");
+  $("suggest").querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => ask(c.textContent)));
+  $("ask-form").addEventListener("submit", (e) => { e.preventDefault(); const q = $("ask-input").value.trim(); if (q) ask(q); });
+  async function ask(q) {
+    const log = $("log"); $("ask-input").value = ""; $("ask-btn").disabled = true;
+    log.insertAdjacentHTML("beforeend", `<div class="bubble user">${esc(q)}</div><div class="bubble bot muted" id="thinking">Consultando su Power BI…</div>`);
+    try { const r = await api("/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: q }) }); $("thinking").outerHTML = `<div class="bubble bot">${esc(r.answer)}</div>`; }
+    catch (e) { $("thinking").outerHTML = `<div class="bubble bot" style="color:var(--bad)">${esc(e.message)}</div>`; }
+    $("ask-btn").disabled = false;
+  }
+
+  // ---------- start ----------
+  async function start() {
+    if (DEMO) { $("demo-note").hidden = false; }
+    else {
+      const ac = await (await fetch("/auth-config")).json();
+      if (ac.mode === "dev") {
+        const client = new URLSearchParams(location.search).get("client");
+        if (!client) { document.querySelector("main").innerHTML = `<div class="panel"><h2>Modo de desarrollo</h2><p>Abra esta página con <span class="mono">?client=&lt;id del cliente&gt;</span>.</p></div>`; return; }
+        auth = { mode: "dev", client };
+      } else {
+        const msal = new window.msal.PublicClientApplication({ auth: { clientId: ac.clientId, authority: ac.authority, redirectUri: location.origin + "/" }, cache: { cacheLocation: "sessionStorage" } });
+        await msal.initialize();
+        const back = await msal.handleRedirectPromise();
+        const account = back?.account || msal.getActiveAccount() || msal.getAllAccounts()[0];
+        if (!account) { await msal.loginRedirect({ scopes: [ac.scope] }); return; }
+        msal.setActiveAccount(account);
+        auth = { mode: "entra", msal, scope: ac.scope };
+      }
+    }
+    try {
+      const cfg = await api("/config");
+      roles = cfg.roles || [];
+      $("company").textContent = cfg.company; $("who").textContent = cfg.user;
+      let saved = "inicio"; try { saved = localStorage.getItem("datia-tab") || "inicio"; } catch {}
+      show(views.includes(saved) ? saved : "inicio");
+      await Promise.all([loadHome(cfg), loadQueue(), loadDocs()]);
+    } catch (e) {
+      document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="message bad">No pudimos cargar sus datos: ${esc(e.message)}. Intente de nuevo en unos minutos o escriba a soporte.</div>`);
+    }
+  }
+  start();
+})();
+</script>
