@@ -1,0 +1,445 @@
+<title>Datia Launch Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: operations room — sticky header with readiness meter, three tabs (launch list, money model, engineering log) on one column that widens to two on desktop */
+:root {
+  --bg: #f4f7f7;
+  --surface: #ffffff;
+  --ink: #142a30;
+  --muted: #56707a;
+  --line: #d6e1e3;
+  --accent: #1f7f97;       /* larimar, same as the client portal */
+  --accent-soft: #dceef2;
+  --good: #227a4f; --good-soft: #e0f1e7;
+  --warn: #a8650a; --warn-soft: #fbefd9;
+  --bad: #b23a33;  --bad-soft: #f8e1df;
+  --plan: #8a6bb8;
+  --font-display: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1a1d; --surface: #16252a; --ink: #e3eef0; --muted: #93abb2; --line: #2a3e44;
+  --accent: #5cc0d8; --accent-soft: #1b3a43;
+  --good: #63c58f; --good-soft: #17352a; --warn: #e3aa4f; --warn-soft: #3a2c14; --bad: #ee7d74; --bad-soft: #3d1f1d;
+  --plan: #b9a1e0; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1a1d; --surface: #16252a; --ink: #e3eef0; --muted: #93abb2; --line: #2a3e44;
+  --accent: #5cc0d8; --accent-soft: #1b3a43;
+  --good: #63c58f; --good-soft: #17352a; --warn: #e3aa4f; --warn-soft: #3a2c14; --bad: #ee7d74; --bad-soft: #3d1f1d;
+  --plan: #b9a1e0; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 1.25rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1rem; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--font-mono); font-size: 0.85em; }
+.num { font-variant-numeric: tabular-nums; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-inner { max-width: 1120px; margin: 0 auto; padding: 12px 16px 0; display: grid; gap: 10px; }
+.brandrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+.brandrow h1 b { color: var(--accent); }
+.meter { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; min-width: 0; }
+.bar { width: 160px; max-width: 40vw; height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+.tabs { display: flex; gap: 4px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 14px; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 56px; display: grid; gap: 20px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; min-width: 0; display: grid; gap: 14px; align-content: start; }
+.lede { max-width: 70ch; }
+.note { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; }
+.note.warn { background: var(--warn-soft); }
+
+/* launch list */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 0.85rem; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.lists { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 860px) { .lists { grid-template-columns: minmax(0, 1fr); } }
+.listhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.items { list-style: none; margin: 0; padding: 0; display: grid; }
+.items li { border-top: 1px solid var(--line); }
+.items label { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; padding: 10px 0; cursor: pointer; }
+.items input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); }
+.items .t { font-weight: 600; }
+.items .d { font-size: 0.85rem; color: var(--muted); }
+.items .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; font-size: 0.78rem; }
+.items li.done .t { text-decoration: line-through; color: var(--muted); }
+.tag { border-radius: 999px; padding: 1px 8px; font-weight: 600; }
+.tag.block { background: var(--bad-soft); color: var(--bad); }
+.tag.who { background: var(--accent-soft); color: var(--accent); }
+.tag.claude { background: var(--good-soft); color: var(--good); }
+
+/* model */
+.model { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .model { grid-template-columns: minmax(0, 1fr); } }
+.ctl { display: grid; gap: 4px; }
+.ctl .row { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; font-weight: 600; }
+.ctl output { font-family: var(--font-mono); font-weight: 500; }
+.ctl input[type="range"] { width: 100%; accent-color: var(--accent); }
+.ctl small { color: var(--muted); font-size: 0.78rem; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 620px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; }
+.kpi strong { display: block; font-family: var(--font-display); font-size: 1.5rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.kpi span { font-size: 0.8rem; color: var(--muted); }
+.kpi.ok { border-color: var(--good); } .kpi.warn { border-color: var(--warn); } .kpi.bad { border-color: var(--bad); }
+.chart svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--muted); }
+.legend i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th { text-align: left; font-weight: 600; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+td { padding: 8px; border-bottom: 1px solid var(--line); }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 14px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+
+/* engineering log */
+.log { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 860px) { .log { grid-template-columns: minmax(0, 1fr); } }
+.finding { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 4px; }
+.finding:first-of-type { border-top: 0; padding-top: 0; }
+.sev { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; border-radius: 999px; padding: 1px 9px; width: fit-content; }
+.sev::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.sev.high { background: var(--bad-soft); color: var(--bad); }
+.sev.med { background: var(--warn-soft); color: var(--warn); }
+.sev.low { background: var(--accent-soft); color: var(--accent); }
+.sev.fixed { background: var(--good-soft); color: var(--good); }
+.status { font-size: 0.82rem; }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brandrow">
+      <h1><b>Datia</b> Launch Room</h1>
+      <span class="muted" style="font-size:.85rem;">Road to client 1 · updated Oct 6, 2026</span>
+      <div class="meter" aria-live="polite"><span id="meter-text" class="num">Blocking items: –</span><div class="bar" aria-hidden="true"><i id="meter-bar"></i></div></div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-launch" aria-selected="true" data-view="launch">Launch list</button>
+      <button class="tab" role="tab" id="tab-model" aria-selected="false" data-view="model">Money model</button>
+      <button class="tab" role="tab" id="tab-eng" aria-selected="false" data-view="eng">Engineering log</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- LAUNCH LIST -->
+  <section id="view-launch" style="display:grid;gap:20px;">
+    <div class="panel">
+      <p class="lede">Every item from the Datia Launch Checklist (Oct 4). Tick an item when it's done. Your team sees the same list, so everyone works from one source of truth. Items marked <span class="tag block">Blocks client 1</span> must be done before go-live.</p>
+      <div class="filters">
+        <button class="chip" id="f-all" aria-pressed="true" data-f="all">All items</button>
+        <button class="chip" id="f-block" aria-pressed="false" data-f="block">Only blocking</button>
+        <button class="chip" id="f-open" aria-pressed="false" data-f="open">Still open</button>
+        <span class="muted status" id="sync-status">Connecting to the shared list…</span>
+      </div>
+    </div>
+    <div class="lists" id="lists"></div>
+  </section>
+
+  <!-- MONEY MODEL -->
+  <section id="view-model" hidden style="display:grid;gap:20px;">
+    <div class="panel">
+      <h2>36-month model, rebuilt from the business plan</h2>
+      <p class="lede muted">I rebuilt the plan's base case from its stated assumptions: client ramp, US$1,690/month average recurring revenue, US$420 direct cost, pilot discount, hiring schedule with 30% employer charges. The rebuild lands within 4% of the plan on revenue and on the month-15 break-even. Move the sliders to stress-test it.</p>
+      <div class="note warn" id="model-insight"></div>
+    </div>
+    <div class="model">
+      <div class="panel" id="controls">
+        <div class="ctl"><div class="row"><label for="c-speed">Sales speed</label><output id="o-speed"></output></div><input type="range" id="c-speed" min="40" max="150" step="5" value="100"><small>100% = plan ramp: 2, then 3, then 4 new clients a month</small></div>
+        <div class="ctl"><div class="row"><label for="c-churn">Monthly churn</label><output id="o-churn"></output></div><input type="range" id="c-churn" min="0" max="5" step="0.25" value="1.5"><small>Plan: 1.5%</small></div>
+        <div class="ctl"><div class="row"><label for="c-rec">Avg. recurring per client</label><output id="o-rec"></output></div><input type="range" id="c-rec" min="900" max="2600" step="10" value="1690"><small>Plan: US$1,690 (Crecimiento-weighted, 5% fee included)</small></div>
+        <div class="ctl"><div class="row"><label for="c-lag">Go-live lag</label><output id="o-lag"></output></div><input type="range" id="c-lag" min="0" max="3" step="1" value="0"><small>Months between signing and first monthly invoice. Plan assumes 0</small></div>
+        <div class="ctl"><div class="row"><label for="c-hire">Hiring</label><output id="o-hire"></output></div><input type="range" id="c-hire" min="0" max="1" step="1" value="0"><small>Calendar = plan dates. Trigger = hire when there are 8 signed clients per analyst (the plan's own rule)</small></div>
+        <button class="btn" id="reset" type="button">Back to the plan</button>
+      </div>
+      <div style="display:grid;gap:20px;min-width:0;">
+        <div class="panel">
+          <div class="kpis">
+            <div class="kpi" id="k-trough"><strong id="v-trough">–</strong><span>lowest cash point</span></div>
+            <div class="kpi" id="k-be"><strong id="v-be">–</strong><span>investment recovered</span></div>
+            <div class="kpi" id="k-clients"><strong id="v-clients">–</strong><span>clients at month 36</span></div>
+            <div class="kpi" id="k-raise"><strong id="v-raise">–</strong><span>of the US$150k raise left at the low point</span></div>
+          </div>
+          <div class="chart" id="chart"></div>
+          <div class="legend"><span><i style="background:var(--accent)"></i>Cumulative cash from operations (this model)</span><span><i style="background:var(--plan)"></i>Plan's published points</span><span><i style="background:var(--bad)"></i>Raise minus US$41.5k setup</span></div>
+        </div>
+        <div class="panel">
+          <h3>By year, against the plan</h3>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Year</th><th class="r">Clients</th><th class="r">Revenue</th><th class="r">Plan revenue</th><th class="r">EBITDA</th><th class="r">Plan EBITDA</th></tr></thead>
+            <tbody id="years"></tbody>
+          </table></div>
+          <p class="muted" style="font-size:.8rem;">US$. Before income tax. Other operating costs grow with headcount (US$3,470 + US$450 per person a month), calibrated so year-3 operating costs match the plan's US$555,600 exactly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENGINEERING LOG -->
+  <section id="view-eng" hidden style="display:grid;gap:20px;">
+    <div class="panel">
+      <h2>What Claude did to the code today</h2>
+      <p class="lede muted" id="eng-lede"></p>
+    </div>
+    <div class="log">
+      <div class="panel" id="built"></div>
+      <div class="panel" id="findings"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // ---------- tabs ----------
+  const views = ["launch", "model", "eng"];
+  function show(v) {
+    views.forEach((x) => { $("view-" + x).hidden = x !== v; $("tab-" + x).setAttribute("aria-selected", String(x === v)); });
+    try { localStorage.setItem("launch-room-tab", v); } catch {}
+  }
+  document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => show(t.dataset.view)));
+  const hash = location.hash.slice(1);
+  let saved = null; try { saved = localStorage.getItem("launch-room-tab"); } catch {}
+  show(views.includes(hash) ? hash : views.includes(saved) ? saved : "launch");
+
+  // ---------- launch list (content from the Oct 4 checklist) ----------
+  const LISTS = [
+    { id: "files", name: "1. Files to add", items: [
+      ["ecf", "3–5 real e-CF XML files", "A sale, a purchase, a credit note E34 and one in dollars. Grupo Propagas files work.", true, "You"],
+      ["bcrd", "One Banco Central rate notice", "tasaus_mc.pdf from bancentral.gov.do, any weekday.", true, "You"],
+      ["rnc", "The DGII RNC file", "DGII_RNC.zip, or the first 1,000 lines of the text file inside.", true, "You"],
+      ["pilotdata", "Pilot client sample data", "One month of POS/ERP sales, 10–20 supplier invoices, one bank statement.", false, "You"],
+      ["pilotsys", "Pilot client's systems", "ERP or accounting software name and version, vendor contact or table list.", false, "You"],
+      ["decisions5", "The 5 decisions the pilot owner wants to make better", "Plus any report or Excel they use today.", false, "You"],
+      ["pbix", "An existing Power BI file you like", "To base the industry templates on.", false, "You"],
+      ["brand", "Brand", "Final name, logo and colors for the portal.", false, "You"] ] },
+    { id: "decide", name: "2. Decisions", items: [
+      ["name", "Company name", "And whether to register it at ONAPI.", true, "You"],
+      ["first", "First test client", "Suggested: one Grupo Propagas company. Yes or no.", true, "You"],
+      ["pilots", "Pilot clients", "Names of the first 5 companies to approach.", false, "You"],
+      ["fxrule", "Dollar rate rule", "Banco Central buy or sell rate (ask the accountant). Default: sell.", false, "You"],
+      ["templates", "First industry templates", "Distribution, retail and clinics, or others.", false, "You"],
+      ["prices", "Prices final", "US$922.95 / 1,542.45 / 3,243.45 a month plus activation and 5%.", false, "You"],
+      ["region", "Azure region", "East US 2 (default) or another.", false, "You"],
+      ["raise", "Raise", "Confirm the US$150,000 budget and who funds it.", false, "You"] ] },
+    { id: "accounts", name: "3. Accounts and access", items: [
+      ["legal", "Legal entity", "SRL, RNC, company bank account.", true, "You + lawyer"],
+      ["m365", "Microsoft 365", "Company tenant and emails with MFA for all staff.", true, "You"],
+      ["partner", "Microsoft partner", "AI Cloud Partner Program enrollment.", true, "You"],
+      ["csp", "CSP reseller", "Pax8, TD Synnex or Ingram account.", true, "You"],
+      ["azure", "Azure (company)", "Subscription for portal, reference database, nightly jobs.", true, "AI engineer"],
+      ["entra", "Entra groups and app", "Datia SQL Admins group; multi-tenant portal app with Reviewer/Viewer roles.", true, "AI engineer"],
+      ["console", "Claude Console", "Organization, billing, Admin API key, data-retention review.", true, "You"],
+      ["github", "Code hosting", "GitHub organization with automatic tests on every change.", true, "AI engineer", "Test workflow written today"],
+      ["domain", "Domain", "A .do domain for the portal and email.", true, "You"],
+      ["vault", "Password manager", "1Password Business or similar.", true, "You"],
+      ["whatsapp", "WhatsApp Business API", "Twilio or 360dialog, Meta verification.", false, "Customer success"],
+      ["alerts", "Alerts", "One Teams or Slack channel per client.", false, "AI engineer"],
+      ["insurance", "Insurance and pen-test firm", "Cyber insurance; penetration-testing firm.", true, "You"] ] },
+    { id: "runs", name: "4. First real runs", items: [
+      ["pytest", "pytest passes on the engineer's machine", "Was failing at install; fixed today. 63 tests pass.", true, "AI engineer", "Install fixed today"],
+      ["checkecf", "check-ecf on real e-CF files", "Fix any field differences.", true, "AI engineer"],
+      ["refresh", "refresh-fx and refresh-rnc from Azure", "Load real data.", true, "AI engineer"],
+      ["onboard", "onboard.py --dry-run, then a real run", "For the test client.", true, "AI engineer"],
+      ["pbi", "Power BI model published Test → Live", "dataset_id, report_id and checks in the client config.", true, "BI architect"],
+      ["nightly", "One full nightly run in Test", "With the morning summary sent.", true, "AI engineer"],
+      ["signin", "Portal sign-in with a real Microsoft account", "A Viewer cannot approve; a Reviewer can.", true, "AI engineer"],
+      ["isolation", "Isolation test with two companies", "Each sees only its own data and chats.", true, "AI engineer"],
+      ["pentest", "External penetration test", "Of the portal.", true, "Pen-test firm"] ] },
+    { id: "build", name: "5. Still to build", items: [
+      ["blob", "Document storage in Azure Blob", "Today documents sit in a local folder.", false, "AI engineer"],
+      ["mail", "Email intake", "A mailbox per client that forwards invoices.", false, "AI engineer"],
+      ["smtp", "Email sending account", "Microsoft 365 SMTP or Azure Communication Services.", false, "AI engineer"],
+      ["deploy", "Deployment", "Container image, Container Apps jobs, auto-deploy from GitHub.", false, "AI engineer"],
+      ["private", "Private endpoint per client database", "Replaces the open firewall rule.", false, "AI engineer"],
+      ["pbitpl", "Power BI template, first industry", "Spanish measures: Ventas, Compras, ITBIS, margen.", false, "BI architect"],
+      ["backup", "Backups and tested restore", "For each client database.", false, "AI engineer"],
+      ["dgii", "DGII 606/607 files from clean data", "Listed for after client 1. Started today.", false, "AI engineer", "Built today"] ] },
+    { id: "legalbiz", name: "6. Business and legal", items: [
+      ["contracts", "Lawyer reviews the contracts", "Service agreement, SOW, DPA, SLA, AI annex.", true, "You + lawyer"],
+      ["policies", "Policies signed by the team", "Security, data protection, AI use, access, incidents, retention.", true, "Team"],
+      ["accountant", "Accountant confirms retention and rate rule", "10-year records; buy vs sell rate.", true, "Accountant"],
+      ["hire", "Hire the core team", "Lead BI architect, AI engineer, junior BI analyst.", true, "You"],
+      ["certs", "Microsoft certifications started", "PL-300 for analysts.", false, "Team"],
+      ["referral", "Referral agreements", "2–3 accounting firms or ERP resellers.", false, "You"],
+      ["demo", "Pilot offer and Diagnóstico demo ready", "For the first 5 prospects.", false, "You"] ] }
+  ];
+  const ALL = LISTS.flatMap((l) => l.items.map(([id]) => id));
+  const BLOCKING = LISTS.flatMap((l) => l.items.filter((i) => i[3]).map(([id]) => id));
+  let done = {};           // id -> {done, by, at}
+  let filter = "all", db = null, user = null, names = {};
+
+  function renderLists() {
+    $("lists").innerHTML = LISTS.map((l) => {
+      const items = l.items.filter(([id, , , block]) => filter === "all" || (filter === "block" && block) || (filter === "open" && !done[id]?.done));
+      const n = l.items.filter(([id]) => done[id]?.done).length;
+      if (!items.length) return "";
+      return `<div class="panel"><div class="listhead"><h3>${esc(l.name)}</h3><span class="muted num" style="font-size:.85rem;">${n} of ${l.items.length} done</span></div>
+        <ul class="items">${items.map(([id, t, d, block, who, claude]) => {
+          const st = done[id]; const isDone = !!st?.done;
+          const by = isDone && st.by ? `<span class="muted">· ticked by ${esc(names[st.by] || "a teammate")}${st.at ? " on " + new Date(st.at).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""}</span>` : "";
+          return `<li class="${isDone ? "done" : ""}"><label for="cb-${id}"><input type="checkbox" id="cb-${id}" data-id="${id}" ${isDone ? "checked" : ""} ${db ? "" : "disabled"}>
+            <span><span class="t">${esc(t)}</span><br><span class="d">${esc(d)}</span>
+            <span class="meta">${block ? '<span class="tag block">Blocks client 1</span>' : ""}<span class="tag who">${esc(who)}</span>${claude ? `<span class="tag claude">${esc(claude)}</span>` : ""}${by}</span></span></label></li>`;
+        }).join("")}</ul></div>`;
+    }).join("");
+    document.querySelectorAll(".items input").forEach((cb) => cb.addEventListener("change", () => toggle(cb.dataset.id, cb.checked, cb)));
+    const nb = BLOCKING.filter((id) => done[id]?.done).length;
+    $("meter-text").textContent = `Blocking items done: ${nb} of ${BLOCKING.length}`;
+    $("meter-bar").style.width = (nb / BLOCKING.length * 100) + "%";
+  }
+  document.querySelectorAll(".filters .chip").forEach((c) => c.addEventListener("click", () => {
+    filter = c.dataset.f;
+    document.querySelectorAll(".filters .chip").forEach((x) => x.setAttribute("aria-pressed", String(x === c)));
+    renderLists();
+  }));
+
+  async function toggle(id, checked, cb) {
+    if (!db) return;
+    cb.disabled = true;
+    try {
+      const me = user ? await user.id() : null;
+      await db.collection("checks").doc(id).set({ done: checked, by: me, at: new Date().toISOString() });
+    } catch (e) {
+      cb.checked = !checked;
+      $("sync-status").textContent = e?.code === "permission_denied" || e?.code === "not_granted" ? "You can view this list but not change it. Ask the owner for edit access." : "That change didn't save. Check your connection and try again.";
+    }
+    cb.disabled = false;
+  }
+
+  async function resolveNames() {
+    if (!user) return;
+    const ids = [...new Set(Object.values(done).map((s) => s.by).filter(Boolean))];
+    if (!ids.length) return;
+    try { const ps = await user.profiles(ids); ids.forEach((i) => { names[i] = ps[i]?.name || ""; }); } catch {}
+    renderLists();
+  }
+
+  renderLists();
+  (async () => {
+    if (!window.claude?.use) { $("sync-status").textContent = "Read-only copy: open it on claude.ai to tick items with your team."; return; }
+    user = await window.claude.use("user");
+    db = await window.claude.use("db");
+    if (!db) { $("sync-status").textContent = "Sign in on claude.ai to tick items. Your team shares this list."; renderLists(); return; }
+    $("sync-status").textContent = "Shared list: your team sees every tick.";
+    db.collection("checks").onSnapshot((snap) => {
+      done = {}; snap.docs.forEach((d) => { if (d.exists && ALL.includes(d.id)) done[d.id] = d.data(); });
+      renderLists(); resolveNames();
+    }, () => { $("sync-status").textContent = "Lost the connection to the shared list. Reload the page to reconnect."; });
+  })();
+
+  // ---------- money model ----------
+  const HIRES = [[1,4000],[1,3000],[1,3000],[1,1100],[7,1800],[7,1400],[7,1200],[10,1000],[13,1800],[13,2500],[19,1800],[19,1200],[25,1800],[25,2500]];
+  const PLAN = { years: [[19, 336000, -28400], [49, 1003400, 303700], [85, 1776500, 782600]], points: [[5, -47000], [15, 0], [36, 1058000]] };
+  const adds = (m) => m < 3 ? 0 : m <= 12 ? 2 : m <= 24 ? 3 : 4;
+
+  function simulate({ speed = 1, churn = 0.015, rec = 1690, lag = 0, trigger = false }) {
+    let clients = 0, cum = 0, signed = 0, carry = 0; const pipe = [], rows = [], yr = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    let hiredLater = 0;   // hires from month 7 on, in trigger mode
+    const later = HIRES.filter(([s]) => s >= 7).sort((a, b) => a[0] - b[0]);
+    for (let m = 1; m <= 36; m++) {
+      carry += adds(m) * speed; const nw = Math.floor(carry + 1e-9); carry -= nw;
+      pipe.push(nw);
+      const live = m - lag >= 1 ? pipe[m - lag - 1] : 0;
+      clients = clients * (1 - churn) + live;
+      let disc = 0; for (let k = signed; k < signed + nw; k++) if (k < 10) disc++;
+      const one = nw * 3412.5 + (nw - disc) * 3500 + disc * 2100 + nw * 0.4 * 2500 * 1.05;
+      signed += nw;
+      const rev = clients * rec + one;
+      const direct = clients * 420 + nw * (0.05 * 12 * rec + 350);
+      let staff;
+      if (trigger) {
+        // one later hire per 8 signed clients beyond the first 8, in plan order
+        hiredLater = Math.max(hiredLater, Math.min(later.length, Math.floor(Math.max(0, signed - 8) / 8 * 1.5 + 1e-9)));
+        staff = HIRES.filter(([s]) => s < 7).concat(later.slice(0, hiredLater));
+      } else staff = HIRES.filter(([s]) => s <= m);
+      const opex = staff.reduce((a, [, s]) => a + s, 0) * 1.3 + 3470 + 450 * staff.length;
+      const e = rev - direct - opex; cum += e;
+      const y = Math.floor((m - 1) / 12); yr[y][0] += rev; yr[y][1] += e; yr[y][2] = clients;
+      rows.push({ m, clients, e, cum });
+    }
+    const low = rows.reduce((a, r) => r.cum < a.cum ? r : a, rows[0]);
+    const be = rows.find((r) => r.m > low.m && r.cum >= 0) || null;
+    const negAfterPos = rows.find((r, i) => i > 0 && r.e < 0 && rows.slice(0, i).some((p) => p.e > 0)) || null;
+    return { rows, yr, low, be, negAfterPos };
+  }
+
+  const fmtK = (v) => (v < 0 ? "−" : "") + "US$" + Math.round(Math.abs(v) / 1000).toLocaleString("en-US") + "k";
+  const fmt = (v) => (v < 0 ? "−" : "") + "US$" + Math.round(Math.abs(v)).toLocaleString("en-US");
+  const ctl = { speed: $("c-speed"), churn: $("c-churn"), rec: $("c-rec"), lag: $("c-lag"), hire: $("c-hire") };
+
+  function drawChart(rows) {
+    const W = 640, H = 260, L = 56, R = 16, T = 16, B = 34;
+    const vals = rows.map((r) => r.cum).concat(PLAN.points.map((p) => p[1]), [-108500, 0]);
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    const step = (hi - lo) > 900000 ? 250000 : (hi - lo) > 400000 ? 100000 : 50000;
+    lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+    const x = (m) => L + (m) / 36 * (W - L - R), y = (v) => T + (hi - v) / (hi - lo) * (H - T - B);
+    let g = "";
+    for (let v = lo; v <= hi + 1; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="${v === 0 ? 1.5 : 1}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v === 0 ? "0" : fmtK(v)}</text>`;
+    for (let m = 0; m <= 36; m += 6) g += `<text x="${x(m)}" y="${H - 12}" text-anchor="middle" font-size="11" fill="var(--muted)">${m === 0 ? "month 0" : m}</text>`;
+    const cushion = -108500;   // US$150k raise minus US$41.5k setup
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(cushion)}" y2="${y(cushion)}" stroke="var(--bad)" stroke-dasharray="4 4"/>`;
+    const pts = [[0, 0]].concat(rows.map((r) => [r.m, r.cum]));
+    const path = pts.map(([m, v], i) => (i ? "L" : "M") + x(m).toFixed(1) + " " + y(v).toFixed(1)).join(" ");
+    const area = path + ` L ${x(36)} ${y(Math.max(lo, Math.min(0, hi)))} L ${x(0)} ${y(Math.max(lo, Math.min(0, hi)))} Z`;
+    g += `<path d="${area}" fill="var(--accent)" fill-opacity="0.08"/><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;
+    PLAN.points.forEach(([m, v]) => { g += `<circle cx="${x(m)}" cy="${y(v)}" r="5" fill="var(--surface)" stroke="var(--plan)" stroke-width="2.5"><title>Plan: ${fmtK(v)} at month ${m}</title></circle>`; });
+    const low = rows.reduce((a, r) => r.cum < a.cum ? r : a, rows[0]);
+    g += `<circle cx="${x(low.m)}" cy="${y(low.cum)}" r="4.5" fill="var(--accent)"/><text x="${x(low.m) + 8}" y="${y(low.cum) + 16}" font-size="11.5" font-weight="600" fill="var(--ink)">${fmtK(low.cum)}, month ${low.m}</text>`;
+    const end = rows[35];
+    g += `<circle cx="${x(36)}" cy="${y(end.cum)}" r="4.5" fill="var(--accent)"/><text x="${x(36) - 8}" y="${y(end.cum) - 10}" text-anchor="end" font-size="11.5" font-weight="600" fill="var(--ink)">${fmtK(end.cum)}</text>`;
+    $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cumulative cash from operations over 36 months">${g}</svg>`;
+  }
+
+  function updateModel() {
+    const p = { speed: ctl.speed.value / 100, churn: ctl.churn.value / 100, rec: +ctl.rec.value, lag: +ctl.lag.value, trigger: ctl.hire.value === "1" };
+    $("o-speed").textContent = ctl.speed.value + "%";
+    $("o-churn").textContent = (+ctl.churn.value).toFixed(2) + "%";
+    $("o-rec").textContent = fmt(p.rec);
+    $("o-lag").textContent = p.lag ? p.lag + (p.lag === 1 ? " month" : " months") : "none";
+    $("o-hire").textContent = p.trigger ? "Trigger" : "Calendar";
+    const r = simulate(p);
+    $("v-trough").textContent = fmtK(r.low.cum) + " · m" + r.low.m;
+    $("v-be").textContent = r.be ? "Month " + r.be.m : "Not in 36 months";
+    $("v-clients").textContent = Math.round(r.rows[35].clients);
+    const left = 108500 + r.low.cum;
+    $("v-raise").textContent = fmtK(left);
+    $("k-trough").className = "kpi " + (r.low.cum > -60000 ? "ok" : r.low.cum > -108500 ? "warn" : "bad");
+    $("k-be").className = "kpi " + (!r.be ? "bad" : r.be.m <= 18 ? "ok" : "warn");
+    $("k-raise").className = "kpi " + (left > 40000 ? "ok" : left > 0 ? "warn" : "bad");
+    $("k-clients").className = "kpi";
+    drawChart(r.rows);
+    $("years").innerHTML = r.yr.map((y, i) => `<tr><td>Year ${i + 1}</td><td class="r">${Math.round(y[2])}</td><td class="r">${fmt(y[0])}</td><td class="r muted">${fmt(PLAN.years[i][1])}</td><td class="r">${fmt(y[1])}</td><td class="r muted">${fmt(PLAN.years[i][2])}</td></tr>`).join("");
+    const base = simulate({});
+    const nap = base.negAfterPos;
+    $("model-insight").innerHTML = `<strong>One thing the plan doesn't show:</strong> at plan settings, monthly EBITDA first turns positive in month 6, then goes back to <strong>${fmt(nap ? nap.e : 0)}</strong> in month ${nap ? nap.m : "–"}, when the analyst, customer-success and sales hires start together. The low point is about <strong>${fmtK(base.low.cum)} in month ${base.low.m}</strong>, not US$47k in month 5. The raise still covers it. Set hiring to <em>Trigger</em> to see the plan's own "hire on signed clients" rule smooth it out.`;
+  }
+  Object.values(ctl).forEach((c) => c.addEventListener("input", updateModel));
+  $("reset").addEventListener("click", () => { ctl.speed.value = 100; ctl.churn.value = 1.5; ctl.rec.value = 1690; ctl.lag.value = 0; ctl.hire.value = 0; updateModel(); });
+  updateModel();
+
+  // ---------- engineering log ----------
+  const BUILT = [{"tag": "Fixed", "title": "The engineer's first command works again", "body": "pip install -e \".[dev]\" failed on any machine because of how the project was packaged, so checklist item 'pytest passes on the engineer's machine' could not pass. Fixed; the suite runs.", "where": "pyproject.toml"}, {"tag": "Built", "title": "Automatic tests on every change", "body": "A GitHub Actions workflow runs the full suite, isolation tests included, on Python 3.11, 3.12 and 3.13 for every push and pull request. Ready when the GitHub organization exists.", "where": ".github/workflows/tests.yml"}, {"tag": "Built", "title": "DGII 606 and 607 files from the clean data", "body": "One command writes the monthly purchases (606) and sales (607) files in DGII's TXT layout, taken from DGII's own Excel tools. Fields your data does not hold yet (tipo de bienes, forma de pago) are left blank with a warning on each line. Nothing is invented.", "where": "backbone/dgii_formats.py · cli dgii --format 606|607"}, {"tag": "Tests", "title": "From 63 to 93 automated tests, all passing", "body": "Every bug below now has a test that failed before the fix and passes after it, so it cannot come back unnoticed.", "where": "tests/test_review_fixes.py"}];
+  const FINDINGS = [{"sev": "high", "label": "Fixed · high", "title": "A fake e-CF uploaded in the portal went straight into the books", "body": "Any signed-in user, even a Viewer, could upload an unsigned XML invoice for RD$1,180,000 and the rules loaded it into clean data with no human check. Hand-uploaded XML now waits in the review queue.", "where": "pipeline.py · validation.py rule unverified_upload"}, {"sev": "high", "label": "Fixed · high", "title": "Credit notes could count as positive revenue", "body": "When a reviewer corrected the amounts on a B04/E34, or corrected an NCF into a credit note, the negative sign was lost. Sales were overstated by twice the credit note.", "where": "pipeline.py approve_review_item"}, {"sev": "high", "label": "Fixed · high", "title": "Someone else's invoice was booked as our purchase", "body": "Any e-CF not issued by the client counted as a purchase, even when the buyer was another company. That inflates purchases and the ITBIS credit on the 606. Purchases must now carry the client's RNC.", "where": "validation.py rule buyer_is_us"}, {"sev": "med", "label": "Fixed · medium", "title": "E41, E43 and E47 were counted as sales", "body": "Compras, gastos menores and pagos al exterior are issued by the client but are expenses. They now load as purchases.", "where": "validation.py invoice_direction"}, {"sev": "med", "label": "Fixed · medium", "title": "Invoices without an NCF were silently dropped", "body": "Three different receipts from one supplier with no NCF: the first went to review, the other two were rejected as duplicates. All three now go to review.", "where": "pipeline.py promote"}, {"sev": "med", "label": "Fixed · medium", "title": "The ITBIS rule accepted negative and missing ITBIS", "body": "A credit note with 50% ITBIS, an invoice with −RD$180 ITBIS, and a taxable sale with no ITBIS all passed. They now go to review.", "where": "validation.py rule 5"}, {"sev": "low", "label": "Fixed · low", "title": "Wrong-type date corrections crashed and used the UTC clock", "body": "A numeric date correction skipped the date rule and returned a server error; approvals after 8 p.m. in Santo Domingo used tomorrow's UTC date. Both fixed.", "where": "pipeline.py · portal/app.py"}, {"sev": "low", "label": "Open · needs real Azure", "title": "Three items to confirm against real services", "body": "Run lock can race on SQL Server (add a unique filtered index); the portal should refuse app-only Entra tokens (check the scp claim); a row SQL Server refuses still marks its document as read. None can be proven on SQLite here.", "where": "pipeline.py:run lock · portal/app.py token check"}];
+  $("eng-lede").textContent = "I read your business plan, the operations playbook and the launch checklist, ran the backbone code, and had a second Claude agent review it from scratch while a third built the DGII formats. Every fix below is committed with a test.";
+  $("built").innerHTML = `<h3>Built and committed</h3>` + BUILT.map((b) => `<div class="finding"><span class="sev fixed">${esc(b.tag)}</span><strong>${esc(b.title)}</strong><p class="muted" style="font-size:.9rem;">${esc(b.body)}</p>${b.where ? `<span class="mono muted">${esc(b.where)}</span>` : ""}</div>`).join("");
+  $("findings").innerHTML = `<h3>Code review findings</h3>` + FINDINGS.map((f) => `<div class="finding"><span class="sev ${f.sev}">${esc(f.label)}</span><strong>${esc(f.title)}</strong><p class="muted" style="font-size:.9rem;">${esc(f.body)}</p><span class="mono muted">${esc(f.where)}</span></div>`).join("");
+})();
+</script>
