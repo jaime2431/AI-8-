@@ -6,6 +6,7 @@
   python -m backbone.cli nightly-all            # loops clients one by one, each in its own context
   python -m backbone.cli review    --client ferreteria-norte
   python -m backbone.cli fx        --client ferreteria-norte --date 2026-10-03 --rate 63.25
+  python -m backbone.cli dgii      --client ferreteria-norte --period 2026-09 --format 607 [--out file.TXT]
 """
 from __future__ import annotations
 
@@ -18,7 +19,8 @@ from sqlalchemy import insert, select
 
 from . import settings
 from .context import open_client
-from .db import create_tables, fx_rates, review_queue, staging_invoices
+from . import dgii_formats
+from .db import audit, clean_invoices, create_tables, fx_rates, review_queue, staging_invoices
 from .notify import ConsoleNotifier, EmailNotifier, WebhookNotifier
 from .pipeline import ingest_document, run_nightly
 from . import reference
@@ -58,6 +60,14 @@ def main(argv=None):
         if name == "fx":
             s.add_argument("--rate", type=Decimal, required=True)
     sub.add_parser("nightly-all")
+    s = sub.add_parser("dgii", help="write the DGII 606 (compras) or 607 (ventas) TXT for one month")
+    s.add_argument("--client", required=True)
+    s.add_argument("--period", required=True, help="YYYY-MM")
+    s.add_argument("--format", required=True, choices=("606", "607"))
+    s.add_argument("--out", help="default: DGII_F_<format>_<RNC>_<AAAAMM>.TXT in the current folder")
+    s.add_argument("--tipo-bienes", help="606: tipo de bienes y servicios code (01-11) for every row")
+    s.add_argument("--forma-pago", help="606: forma de pago code (01-07) for every row")
+    s.add_argument("--tipo-ingreso", help="607: tipo de ingreso code (1-6) for every row")
     s = sub.add_parser("check-ecf", help="read real e-CF files and show what the system would load (no database)")
     s.add_argument("files", nargs="+")
     s.add_argument("--own-rnc", required=True, help="RNC of the company the files belong to")
@@ -145,6 +155,30 @@ def main(argv=None):
         with ctx.engine.begin() as conn:
             reference.save_manual_rate(conn, a.date, a.rate)
         print("rate saved (manual; the daily Banco Central load will not overwrite it)")
+    elif a.cmd == "dgii":
+        write_dgii(ctx, a)
+
+
+def write_dgii(ctx, a):
+    """Builds the 606/607 from clean_invoices for the month, prints every warning and writes the file."""
+    start, end = dgii_formats.period_bounds(a.period)
+    with ctx.engine.begin() as conn:
+        rows = conn.execute(select(clean_invoices).where(clean_invoices.c.issue_date >= start,
+                                                         clean_invoices.c.issue_date < end)
+                            .order_by(clean_invoices.c.issue_date, clean_invoices.c.id)).mappings().all()
+        if a.format == "606":
+            text, warnings = dgii_formats.build_606(rows, ctx.config.own_rnc, a.period, a.tipo_bienes, a.forma_pago)
+        else:
+            text, warnings = dgii_formats.build_607(rows, ctx.config.own_rnc, a.period, a.tipo_ingreso)
+        out = a.out or dgii_formats.file_name(a.format, ctx.config.own_rnc, a.period)
+        with open(out, "w", encoding="utf-8", newline="") as f:     # newline="": keep DGII's CRLF as built
+            f.write(text)
+        records = text.count("\r\n")
+        audit(conn, "cli", "dgii_file", {"format": a.format, "period": a.period, "file": str(out),
+                                         "records": records, "warnings": len(warnings)})
+    for w in warnings:
+        print(f"WARNING {w}")
+    print(f"{a.format} written to {out}: {records} records, {len(warnings)} warnings")
 
 
 if __name__ == "__main__":
