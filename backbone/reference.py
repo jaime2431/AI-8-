@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import io
 import re
+import time
 import zipfile
 from datetime import date, timedelta
 from decimal import Decimal
@@ -64,11 +65,24 @@ def parse_rnc_lines(lines: Iterable[str]) -> Iterator[dict]:
     """Yields one dict per valid row. Raises if most rows do not look like the DGII layout,
     so a silent format change never wipes the registry."""
     seen = recognised = 0
+    pending = ""                    # the real file has line breaks inside some name fields
     for i, raw in enumerate(lines):
         line = raw.lstrip("﻿\xef\xbb\xbf").rstrip("\r\n") if i == 0 else raw.rstrip("\r\n")
+        if pending:
+            joined = pending + " " + line
+            n = joined.count("|") + 1
+            if n < 11:
+                pending = joined
+                continue
+            pending = ""
+            if n == 11:
+                line = joined
         if not line.strip():
             continue
         parts = line.split("|")
+        if len(parts) < 11:
+            pending = line
+            continue
         if len(parts) != 11:
             continue
         status = _collapse(parts[9]).upper()
@@ -213,6 +227,9 @@ def save_manual_rate(conn: Connection, day: date, value: Decimal) -> None:
 
 
 def download(url: str, timeout: float = 120) -> bytes:
-    r = httpx.get(url, timeout=timeout, follow_redirects=True, headers={"User-Agent": "datia-backbone/0.1"})
+    # The Banco Central CDN serves yesterday's notice from cache for the plain URL and ignores
+    # Cache-Control request headers; only a query string it has not seen yet fetches the current file.
+    params = {"t": str(int(time.time()))} if url.startswith("https://cdn.bancentral.gov.do/") else None
+    r = httpx.get(url, params=params, timeout=timeout, follow_redirects=True, headers={"User-Agent": "datia-backbone/0.1"})
     r.raise_for_status()
     return r.content

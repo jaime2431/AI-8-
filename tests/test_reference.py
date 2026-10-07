@@ -143,3 +143,50 @@ def test_registry_missing_can_be_approved_and_cedula_buyers_are_skipped():
     new_supplier = dict(sale_to_person, direction="purchase", issuer_rnc="401506254", buyer_rnc="131000002")
     d = validate_invoice(new_supplier, ctx)
     assert d.status == "review" and [r.rule for r in d.problems()] == ["rnc_registry_missing"]
+
+
+FIXTURES = __import__("pathlib").Path(__file__).parent / "fixtures"
+
+
+def test_real_dgii_file_head_parses():
+    """First 200 lines of the real DGII_RNC.TXT (3 Oct 2026): latin-1, CRLF, 11 columns, cédulas and RNCs."""
+    rows = list(read_rnc_zip(make_zip((FIXTURES / "dgii_rnc_head.txt").read_bytes().decode("latin-1").split("\r\n")[:-1])))
+    assert len(rows) == 200
+    assert {r["status"] for r in rows} == {"ACTIVO", "SUSPENDIDO", "CESE TEMPORAL"}
+    assert rows[1] == {"rnc": "00300749256", "name": "CASTALIO LEONIDAS RUIZ SANTANA", "trade_name": "MOTO PRESTAMO LA SOMBRA",
+                       "status": "SUSPENDIDO", "regime": "NORMAL"}
+
+
+def test_dgii_rows_with_line_breaks_inside_names_are_kept():
+    # Copied from the real file: some names contain CRLF, so one record spans several lines.
+    lines = [dgii_line("401506254", "DGII", "ACTIVO"),
+             "132093909|ONE VISION INVESTMENT GROUP", " SRL|ONE VISION INVESTMENT GROUP",
+             "|SERVICIOS DE CRÉDITO N.C.P. (I| | | | |01/05/2020|SUSPENDIDO|NORMAL",
+             "132844602|", "ECOZANDRO GROUP SRL|", "ECOZANDRO GROUP",
+             "|VENTA DE VEHÍCULOS AUTOMOTORES| | | | |21/04/2023|SUSPENDIDO|NORMAL",
+             "truncated|row", dgii_line("101005009", "CARIBE", "ACTIVO")]
+    rows = list(read_rnc_zip(make_zip(lines)))
+    assert [r["rnc"] for r in rows] == ["401506254", "132093909", "132844602", "101005009"]
+    assert rows[1]["name"] == "ONE VISION INVESTMENT GROUP SRL" and rows[2]["trade_name"] == "ECOZANDRO GROUP"
+
+
+def test_real_bcrd_notice_pdf():
+    """The real Banco Central notice published at the close of 6 Oct 2026."""
+    notice = parse_bcrd_notice(pdf_text((FIXTURES / "bcrd_tasaus_mc_2026-10-06.pdf").read_bytes()), today=date(2026, 10, 7))
+    assert notice == {"buy": Decimal("60.8522"), "sell": Decimal("61.4111"),
+                      "from": date(2026, 10, 6), "to": date(2026, 10, 7)}
+
+
+def test_bcrd_download_bypasses_stale_cdn_cache(monkeypatch):
+    from backbone import reference
+    calls = []
+
+    class Resp:
+        content = b"%PDF"
+        def raise_for_status(self):
+            pass
+
+    monkeypatch.setattr(reference.httpx, "get", lambda url, **kw: calls.append(kw.get("params")) or Resp())
+    reference.download(reference.BCRD_RATE_URL)
+    reference.download(reference.DGII_RNC_URL)
+    assert calls[0] and "t" in calls[0] and calls[1] is None
