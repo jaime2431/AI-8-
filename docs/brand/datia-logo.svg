@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 64" role="img" aria-label="Datia">
+  <!-- Datia logo: mark + wordmark. The wordmark uses Familjen Grotesk (Google Fonts); outline it before print use. -->
+  <rect width="64" height="64" rx="15" fill="#1f7f97"/>
+  <circle cx="27" cy="38" r="11" fill="none" stroke="#ffffff" stroke-width="7"/>
+  <rect x="38" y="12" width="7" height="38" rx="3.5" fill="#ffffff"/>
+  <circle cx="19" cy="17" r="4.5" fill="#9fe0ee"/>
+  <text x="78" y="49" font-family="'Familjen Grotesk', 'Segoe UI', system-ui, sans-serif" font-weight="700" font-size="46" letter-spacing="-1.5" fill="#142a30">datia</text>
+</svg>

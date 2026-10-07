@@ -44,7 +44,8 @@ button, input, textarea { font: inherit; color: inherit; }
 
 .topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
 .topbar-inner { max-width: 1160px; margin: 0 auto; padding: 12px 16px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
-.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand .mark { width: 28px; height: 28px; flex: none; }
 .brand b { font-family: var(--font-display); font-size: 1.15rem; color: var(--accent); }
 .brand span { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .who { margin-left: auto; font-size: 0.85rem; }
@@ -122,7 +123,7 @@ input.changed { border-color: var(--accent); background: var(--accent-soft); }
 
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="brand"><b>Datia</b><span id="company">Cargando…</span></div>
+    <div class="brand"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="var(--accent)"/><circle cx="27" cy="38" r="11" fill="none" stroke="var(--surface)" stroke-width="7"/><rect x="38" y="12" width="7" height="38" rx="3.5" fill="var(--surface)"/><circle cx="19" cy="17" r="4.5" fill="#9fe0ee"/></svg><b>datia</b><span id="company">Cargando…</span></div>
     <div class="who muted" id="who"></div>
     <nav class="tabs" role="tablist" aria-label="Secciones">
       <button class="tab" role="tab" id="tab-inicio" aria-selected="true" data-view="inicio">Inicio</button>

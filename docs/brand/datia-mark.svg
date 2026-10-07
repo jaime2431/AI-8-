@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Datia">
+  <!-- Datia mark: a lowercase d drawn as a data ring and a rising bar, with a spark for the AI. Larimar blue. -->
+  <rect width="64" height="64" rx="15" fill="#1f7f97"/>
+  <circle cx="27" cy="38" r="11" fill="none" stroke="#ffffff" stroke-width="7"/>
+  <rect x="38" y="12" width="7" height="38" rx="3.5" fill="#ffffff"/>
+  <circle cx="19" cy="17" r="4.5" fill="#9fe0ee"/>
+</svg>

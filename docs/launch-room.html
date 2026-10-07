@@ -123,7 +123,7 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 <header class="top">
   <div class="top-inner">
     <div class="brandrow">
-      <h1><b>Datia</b> Launch Room</h1>
+      <svg class="mark" width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="var(--accent)"/><circle cx="27" cy="38" r="11" fill="none" stroke="var(--surface)" stroke-width="7"/><rect x="38" y="12" width="7" height="38" rx="3.5" fill="var(--surface)"/><circle cx="19" cy="17" r="4.5" fill="#9fe0ee"/></svg><h1><b>datia</b> Launch Room</h1>
       <span class="muted" style="font-size:.85rem;">Road to client 1 · updated Oct 6, 2026</span>
       <div class="meter" aria-live="polite"><span id="meter-text" class="num">Blocking items: –</span><div class="bar" aria-hidden="true"><i id="meter-bar"></i></div></div>
     </div>
@@ -221,14 +221,14 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
   // ---------- launch list (content from the Oct 4 checklist) ----------
   const LISTS = [
     { id: "files", name: "1. Files to add", items: [
-      ["ecf", "3–5 real e-CF XML files", "A sale, a purchase, a credit note E34 and one in dollars. Grupo Propagas files work.", true, "You"],
-      ["bcrd", "One Banco Central rate notice", "tasaus_mc.pdf from bancentral.gov.do, any weekday.", true, "You"],
-      ["rnc", "The DGII RNC file", "DGII_RNC.zip, or the first 1,000 lines of the text file inside.", true, "You"],
-      ["pilotdata", "Pilot client sample data", "One month of POS/ERP sales, 10–20 supplier invoices, one bank statement.", false, "You"],
-      ["pilotsys", "Pilot client's systems", "ERP or accounting software name and version, vendor contact or table list.", false, "You"],
-      ["decisions5", "The 5 decisions the pilot owner wants to make better", "Plus any report or Excel they use today.", false, "You"],
-      ["pbix", "An existing Power BI file you like", "To base the industry templates on.", false, "You"],
-      ["brand", "Brand", "Final name, logo and colors for the portal.", false, "You"] ] },
+      ["ecf", "3–5 real e-CF XML files", "A sale, a purchase, a credit note E34 and one in dollars. Grupo Propagas files work.", true, "You", "5 synthetic samples pass check-ecf; real files still needed"],
+      ["bcrd", "One Banco Central rate notice", "tasaus_mc.pdf from bancentral.gov.do, any weekday.", true, "You", "Done by Claude: real Oct 6 PDF read, 60.8522 / 61.4111"],
+      ["rnc", "The DGII RNC file", "DGII_RNC.zip, or the first 1,000 lines of the text file inside.", true, "You", "Done by Claude: 793,093 RNCs loaded; your own RNC not needed"],
+      ["pilotdata", "Pilot client sample data", "One month of POS/ERP sales, 10–20 supplier invoices, one bank statement.", false, "You", "Fictitious pilot built (event caterer, 12 months)"],
+      ["pilotsys", "Pilot client's systems", "ERP or accounting software name and version, vendor contact or table list.", false, "You", "Assumed: Monica + Excel"],
+      ["decisions5", "The 5 decisions the pilot owner wants to make better", "Plus any report or Excel they use today.", false, "You", "Received; dashboard built on them"],
+      ["pbix", "An existing Power BI file you like", "To base the industry templates on.", false, "You", "Model, 102 DAX measures and dashboard built"],
+      ["brand", "Brand", "Final name, logo and colors for the portal.", false, "You", "Logo made; final name pending"] ] },
     { id: "decide", name: "2. Decisions", items: [
       ["name", "Company name", "And whether to register it at ONAPI.", true, "You"],
       ["first", "First test client", "Suggested: one Grupo Propagas company. Yes or no.", true, "You"],
