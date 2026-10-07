@@ -139,3 +139,17 @@ def test_a_date_correction_that_is_not_a_date_is_refused(registry):
     item = _review_item(ctx, ncf="B0100000008")
     with pytest.raises(ValueError):
         approve_review_item(ctx, item, "u1", {"issue_date": 20991231}, today=TODAY)
+
+
+def test_check_ecf_applies_the_buyer_rule(tmp_path, capsys):
+    from backbone import cli
+    f = tmp_path / "otra.xml"
+    f.write_bytes(UNSIGNED_SALE.replace(b"131000002", b"101010632"))
+    import sys
+    argv, sys.argv = sys.argv, ["cli", "check-ecf", str(f), "--own-rnc", OWN_RNC]
+    try:
+        cli.main(["check-ecf", str(f), "--own-rnc", OWN_RNC])
+    finally:
+        sys.argv = argv
+    out = capsys.readouterr().out
+    assert "REVIEW" in out and "buyer_is_us" in out

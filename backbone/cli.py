@@ -20,7 +20,7 @@ from sqlalchemy import insert, select
 from . import settings
 from .context import open_client
 from . import dgii_formats
-from .db import audit, clean_invoices, create_tables, fx_rates, review_queue, staging_invoices
+from .db import audit, business_today, clean_invoices, create_tables, fx_rates, review_queue, staging_invoices
 from .notify import ConsoleNotifier, EmailNotifier, WebhookNotifier
 from .pipeline import ingest_document, run_nightly
 from . import reference
@@ -88,7 +88,7 @@ def main(argv=None):
                 print(f"{f}: skipped, not an invoice ({e})"); continue
             except Exception as e:
                 print(f"{f}: ERROR {e}"); continue
-            d = validate_invoice(row, ValidationContext(today=date.today()))
+            d = validate_invoice(row, ValidationContext(today=business_today(), own_rnc=a.own_rnc))
             keys = ("direction", "ncf", "issuer_rnc", "buyer_rnc", "issue_date", "subtotal", "itbis", "total",
                     "foreign_currency", "foreign_total")
             print(f"{f}: {d.status.upper()}  " + "  ".join(f"{k}={row.get(k)}" for k in keys if row.get(k) is not None))
