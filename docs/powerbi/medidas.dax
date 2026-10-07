@@ -1,0 +1,755 @@
+// =====================================================================================
+// Biblioteca de medidas — Sabor & Escena Catering SRL (piloto Datia)
+// Modelo: docs/powerbi/modelo.md. Todas las medidas viven en la tabla '_Medidas'.
+//
+// Cómo cargarla: Power BI Desktop > Vista de consulta DAX > pegar este archivo >
+// "Actualizar modelo con cambios" (CodeLens sobre DEFINE). Los comentarios /// pasan a ser la
+// descripción de cada medida. La carpeta para mostrar (display folder) es el encabezado
+// "Carpeta:" de cada sección; asignarla en la vista TMDL o en Propiedades (ver README.md).
+//
+// Convenciones: Ventas = Subtotal sin ITBIS ni propina, en RD$. Medidas que empiezan con "_"
+// son auxiliares y van ocultas. Formatos: RD$ "#,0", % "0.0%", días "0.0".
+// =====================================================================================
+
+DEFINE
+
+// -------------------------------------------------------------------------------------
+// Carpeta: 0. Parámetros
+// -------------------------------------------------------------------------------------
+
+/// Fecha de hoy en República Dominicana (UTC-4); el servicio corre en UTC.
+MEASURE '_Medidas'[Hoy RD] =
+    VAR _ahora = UTCNOW () - 4 / 24
+    RETURN DATE ( YEAR ( _ahora ), MONTH ( _ahora ), DAY ( _ahora ) )
+
+/// Fecha a la que se leen saldos, stock y tasas: último día del período filtrado, nunca después de hoy.
+MEASURE '_Medidas'[Fecha Corte] =
+    MIN ( MAX ( 'Fecha'[Fecha] ), [Hoy RD] )
+
+/// Tasa de VENTA del Banco Central vigente en la fecha de corte (política de la empresa).
+MEASURE '_Medidas'[Tasa Venta Vigente] =
+    VAR _c = [Fecha Corte]
+    RETURN CALCULATE ( MAX ( 'Fecha'[Tasa_Venta] ), REMOVEFILTERS ( 'Fecha' ), 'Fecha'[Fecha] = _c )
+
+/// Tasa de COMPRA del Banco Central vigente en la fecha de corte (solo referencia).
+MEASURE '_Medidas'[Tasa Compra Vigente] =
+    VAR _c = [Fecha Corte]
+    RETURN CALCULATE ( MAX ( 'Fecha'[Tasa_Compra] ), REMOVEFILTERS ( 'Fecha' ), 'Fecha'[Fecha] = _c )
+
+/// Meta del dueño: beneficio neto de US$5,000 por quincena.
+MEASURE '_Medidas'[Meta Quincena USD] = 5000
+
+/// Fecha límite DGII para emitir 100 % e-CF (Ley 32-23, calendario de la empresa).
+MEASURE '_Medidas'[Fecha Límite e-CF] = DATE ( 2026, 11, 15 )
+
+// -------------------------------------------------------------------------------------
+// Carpeta: 1. Ventas
+// -------------------------------------------------------------------------------------
+
+/// Ventas en RD$ antes de ITBIS y sin propina legal (Subtotal × Tasa de la factura).
+MEASURE '_Medidas'[Ventas RD$] =
+    SUM ( fVentas[Subtotal_DOP] )
+
+/// Ventas en US$: facturas en USD a su monto original; facturas en RD$ divididas entre la tasa de venta del día.
+MEASURE '_Medidas'[Ventas USD] =
+    SUMX (
+        fVentas,
+        IF (
+            fVentas[Moneda] = "USD",
+            fVentas[Subtotal],
+            DIVIDE ( fVentas[Subtotal_DOP], RELATED ( 'Fecha'[Tasa_Venta] ) )
+        )
+    )
+
+/// Total facturado en RD$ (con ITBIS y propina). Es el número que el control nocturno compara con clean_invoices.total_dop.
+MEASURE '_Medidas'[Total Facturado RD$] =
+    SUM ( fVentas[Total_DOP] )
+
+/// Cantidad de comprobantes de venta (incluye notas de crédito).
+MEASURE '_Medidas'[Cantidad Facturas] =
+    COUNTROWS ( fVentas )
+
+/// Ventas RD$ del mismo período del año anterior.
+MEASURE '_Medidas'[Ventas Año Anterior] =
+    CALCULATE ( [Ventas RD$], SAMEPERIODLASTYEAR ( 'Fecha'[Fecha] ) )
+
+/// Variación % de ventas contra el mismo período del año anterior. En blanco si no hay año anterior.
+MEASURE '_Medidas'[Ventas Var %] =
+    VAR _aa = [Ventas Año Anterior]
+    RETURN IF ( NOT ISBLANK ( _aa ), DIVIDE ( [Ventas RD$] - _aa, _aa ) )
+
+/// Propina legal (10 %, Código de Trabajo) cobrada en RD$. No es ingreso: se reparte al personal.
+MEASURE '_Medidas'[Propina Legal RD$] =
+    SUM ( fVentas[Propina_DOP] )
+
+// -------------------------------------------------------------------------------------
+// Carpeta: 2. Compras e ITBIS
+// -------------------------------------------------------------------------------------
+
+/// Compras en RD$ antes de ITBIS.
+MEASURE '_Medidas'[Compras RD$] =
+    SUM ( fCompras[Subtotal_DOP] )
+
+/// Compras en RD$ con ITBIS. Es el número que el control nocturno compara con clean_invoices.total_dop.
+MEASURE '_Medidas'[Compras Total RD$] =
+    SUM ( fCompras[Total_DOP] )
+
+/// ITBIS facturado en ventas (18 %), en RD$.
+MEASURE '_Medidas'[ITBIS Ventas] =
+    SUM ( fVentas[ITBIS_DOP] )
+
+/// ITBIS pagado en compras con comprobante válido para crédito fiscal (dTipoNCF[Da_Credito_Fiscal]).
+MEASURE '_Medidas'[ITBIS Compras (crédito fiscal)] =
+    CALCULATE ( SUM ( fCompras[ITBIS_DOP] ), KEEPFILTERS ( dTipoNCF[Da_Credito_Fiscal] = TRUE () ) )
+
+/// ITBIS a pagar en el IT-1 = ITBIS de ventas - crédito fiscal. Negativo = saldo a favor. No incluye retenciones.
+MEASURE '_Medidas'[ITBIS a Pagar] =
+    [ITBIS Ventas] - [ITBIS Compras (crédito fiscal)]
+
+/// Gastos operativos: compras cuya categoría es "Gasto operativo" (las de inventario y evento ya están en el costo de eventos).
+MEASURE '_Medidas'[Gastos Operativos RD$] =
+    CALCULATE ( [Compras RD$], KEEPFILTERS ( dCategoriaCompra[Grupo] = "Gasto operativo" ) )
+
+// -------------------------------------------------------------------------------------
+// Carpeta: 3. Rentabilidad y meta
+// -------------------------------------------------------------------------------------
+
+/// Costo de alimentos y bebidas de los eventos realizados (por fecha del evento).
+MEASURE '_Medidas'[Costo Alimentos RD$] =
+    CALCULATE ( SUM ( fEventos[Costo_Alimentos] ), KEEPFILTERS ( fEventos[Estado] = "Realizado" ) )
+
+/// Costo del personal por evento (los ~88 eventuales) de los eventos realizados. No incluye la nómina fija.
+MEASURE '_Medidas'[Costo Personal Eventos RD$] =
+    CALCULATE ( SUM ( fEventos[Costo_Personal] ), KEEPFILTERS ( fEventos[Estado] = "Realizado" ) )
+
+/// Otros costos directos del evento (transporte, alquiler de equipos, montaje) de los eventos realizados.
+MEASURE '_Medidas'[Otros Costos Eventos RD$] =
+    CALCULATE ( SUM ( fEventos[Otros_Costos] ), KEEPFILTERS ( fEventos[Estado] = "Realizado" ) )
+
+/// Costo directo total de los eventos realizados = alimentos + personal por evento + otros.
+MEASURE '_Medidas'[Costo Directo Eventos RD$] =
+    [Costo Alimentos RD$] + [Costo Personal Eventos RD$] + [Otros Costos Eventos RD$]
+
+/// Nómina de los 12 fijos prorrateada por día (solo días hasta hoy), con carga patronal.
+/// Factor 1.2462 = TSS empleador aprox. 16.29 % (SFS 7.09 + AFP 7.10 + SRL ~1.10 + INFOTEP 1.00) + regalía 8.33 %. Contabilidad lo confirma.
+MEASURE '_Medidas'[Nómina Fija RD$] =
+    VAR _factor = 1.2462
+    VAR _mensual = CALCULATE ( SUM ( dEmpleado[Salario_Mensual] ), dEmpleado[Tipo] = "Fijo" ) * _factor
+    VAR _hoy = [Hoy RD]
+    RETURN
+        SUMX (
+            FILTER ( VALUES ( 'Fecha'[Fecha] ), 'Fecha'[Fecha] <= _hoy ),
+            DIVIDE ( _mensual, DAY ( EOMONTH ( 'Fecha'[Fecha], 0 ) ) )
+        )
+
+/// Margen bruto = Ventas RD$ - costo directo de eventos.
+MEASURE '_Medidas'[Margen Bruto RD$] =
+    [Ventas RD$] - [Costo Directo Eventos RD$]
+
+/// Margen bruto como % de las ventas.
+MEASURE '_Medidas'[Margen Bruto %] =
+    DIVIDE ( [Margen Bruto RD$], [Ventas RD$] )
+
+/// Beneficio neto = margen bruto - gastos operativos - nómina fija. (Antes de ISR.)
+MEASURE '_Medidas'[Beneficio Neto RD$] =
+    [Margen Bruto RD$] - [Gastos Operativos RD$] - [Nómina Fija RD$]
+
+/// Margen neto % = beneficio neto / ventas. Objetivo de la empresa: 30 %.
+MEASURE '_Medidas'[Margen Neto %] =
+    DIVIDE ( [Beneficio Neto RD$], [Ventas RD$] )
+
+/// Beneficio neto promedio por quincena en el período (en una sola quincena = su beneficio). Ignora quincenas futuras.
+MEASURE '_Medidas'[Beneficio por Quincena RD$] =
+    VAR _hoy = [Hoy RD]
+    RETURN
+        AVERAGEX (
+            FILTER ( VALUES ( 'Fecha'[Quincena_ID] ), CALCULATE ( MIN ( 'Fecha'[Fecha] ) ) <= _hoy ),
+            [Beneficio Neto RD$]
+        )
+
+/// Beneficio por quincena en US$, cada quincena convertida a la tasa de venta de su último día (o de hoy).
+MEASURE '_Medidas'[Beneficio por Quincena USD] =
+    VAR _hoy = [Hoy RD]
+    RETURN
+        AVERAGEX (
+            FILTER ( VALUES ( 'Fecha'[Quincena_ID] ), CALCULATE ( MIN ( 'Fecha'[Fecha] ) ) <= _hoy ),
+            DIVIDE ( [Beneficio Neto RD$], [Tasa Venta Vigente] )
+        )
+
+/// Meta de la quincena en RD$ = US$5,000 × tasa de venta vigente (61.4111 → RD$307,055.50).
+MEASURE '_Medidas'[Meta Quincena RD$] =
+    [Meta Quincena USD] * [Tasa Venta Vigente]
+
+/// Brecha vs meta en RD$: positivo = por encima de la meta.
+MEASURE '_Medidas'[Brecha vs Meta RD$] =
+    [Beneficio por Quincena RD$] - [Meta Quincena RD$]
+
+/// Brecha vs meta en US$: positivo = por encima de la meta.
+MEASURE '_Medidas'[Brecha vs Meta USD] =
+    [Beneficio por Quincena USD] - [Meta Quincena USD]
+
+/// % de cumplimiento de la meta quincenal (100 % = US$5,000).
+MEASURE '_Medidas'[% Cumplimiento Meta] =
+    DIVIDE ( [Beneficio por Quincena USD], [Meta Quincena USD] )
+
+/// Proyección al cierre de la quincena de la fecha de corte: beneficio a la fecha / días transcurridos × días de la quincena.
+MEASURE '_Medidas'[Beneficio Proyectado Quincena RD$] =
+    VAR _c = [Fecha Corte]
+    VAR _q = CALCULATE ( SELECTEDVALUE ( 'Fecha'[Quincena_ID] ), REMOVEFILTERS ( 'Fecha' ), 'Fecha'[Fecha] = _c )
+    VAR _ini = CALCULATE ( MIN ( 'Fecha'[Fecha] ), REMOVEFILTERS ( 'Fecha' ), 'Fecha'[Quincena_ID] = _q )
+    VAR _fin = CALCULATE ( MAX ( 'Fecha'[Fecha] ), REMOVEFILTERS ( 'Fecha' ), 'Fecha'[Quincena_ID] = _q )
+    VAR _aFecha = CALCULATE ( [Beneficio Neto RD$], REMOVEFILTERS ( 'Fecha' ), DATESBETWEEN ( 'Fecha'[Fecha], _ini, _c ) )
+    RETURN DIVIDE ( _aFecha, INT ( _c - _ini ) + 1 ) * ( INT ( _fin - _ini ) + 1 )
+
+// -------------------------------------------------------------------------------------
+// Carpeta: 4. Eventos
+// -------------------------------------------------------------------------------------
+
+/// Eventos con Estado = "Realizado" (por fecha del evento).
+MEASURE '_Medidas'[Eventos Realizados] =
+    CALCULATE ( COUNTROWS ( fEventos ), KEEPFILTERS ( fEventos[Estado] = "Realizado" ) )
+
+/// Invitados atendidos en eventos realizados.
+MEASURE '_Medidas'[Invitados] =
+    CALCULATE ( SUM ( fEventos[Invitados] ), KEEPFILTERS ( fEventos[Estado] = "Realizado" ) )
+
+/// Ingreso de cada evento realizado: lo facturado (Subtotal RD$, cualquier fecha de factura); si aún no se factura, Invitados × Precio_Por_Persona.
+MEASURE '_Medidas'[Ingreso Evento RD$] =
+    SUMX (
+        CALCULATETABLE ( VALUES ( fEventos[Evento_ID] ), KEEPFILTERS ( fEventos[Estado] = "Realizado" ) ),
+        VAR _id = fEventos[Evento_ID]
+        VAR _facturado =
+            CALCULATE ( SUM ( fVentas[Subtotal_DOP] ), REMOVEFILTERS ( 'Fecha' ), dEvento[Evento_ID] = _id )
+        VAR _contratado =
+            CALCULATE ( SUMX ( fEventos, fEventos[Invitados] * fEventos[Precio_Por_Persona] ) )
+        RETURN COALESCE ( _facturado, _contratado )
+    )
+
+/// Costo de alimentos como % del ingreso de los eventos. Alerta > 35 %.
+MEASURE '_Medidas'[Costo Alimentos %] =
+    DIVIDE ( [Costo Alimentos RD$], [Ingreso Evento RD$] )
+
+/// Costo del personal por evento como % del ingreso de los eventos. Alerta > 25 %.
+MEASURE '_Medidas'[Costo Personal %] =
+    DIVIDE ( [Costo Personal Eventos RD$], [Ingreso Evento RD$] )
+
+/// Margen por evento = ingreso del evento - costo directo (alimentos + personal + otros). Sumable entre eventos.
+MEASURE '_Medidas'[Margen por Evento RD$] =
+    [Ingreso Evento RD$] - [Costo Directo Eventos RD$]
+
+/// Margen por evento como % del ingreso del evento. Alerta < 20 %.
+MEASURE '_Medidas'[Margen por Evento %] =
+    DIVIDE ( [Margen por Evento RD$], [Ingreso Evento RD$] )
+
+/// Margen promedio por evento realizado, en RD$.
+MEASURE '_Medidas'[Margen Promedio por Evento] =
+    DIVIDE ( [Margen por Evento RD$], [Eventos Realizados] )
+
+/// Ticket por invitado = ingreso de eventos / invitados atendidos.
+MEASURE '_Medidas'[Ticket por Invitado] =
+    DIVIDE ( [Ingreso Evento RD$], [Invitados] )
+
+/// Texto de alertas de UN evento (vacío si está bien): margen < 20 %, alimentos > 35 %, personal > 25 %, sin factura > 3 días.
+MEASURE '_Medidas'[Alerta Evento] =
+    IF (
+        HASONEVALUE ( fEventos[Evento_ID] ),
+        VAR _realizado = SELECTEDVALUE ( fEventos[Estado] ) = "Realizado"
+        VAR _fechaEv = SELECTEDVALUE ( fEventos[Fecha_Evento] )
+        VAR _facturas = CALCULATE ( COUNTROWS ( fVentas ), REMOVEFILTERS ( 'Fecha' ), TREATAS ( VALUES ( fEventos[Evento_ID] ), dEvento[Evento_ID] ) )
+        VAR _a1 = IF ( [Margen por Evento %] < 0.20, "Margen < 20 %; " )
+        VAR _a2 = IF ( [Costo Alimentos %] > 0.35, "Alimentos > 35 %; " )
+        VAR _a3 = IF ( [Costo Personal %] > 0.25, "Personal > 25 %; " )
+        VAR _a4 = IF ( _facturas = 0 && [Hoy RD] - _fechaEv > 3, "Sin factura > 3 días; " )
+        RETURN IF ( _realizado, _a1 & _a2 & _a3 & _a4, "" )
+    )
+
+/// Cantidad de eventos realizados con al menos una alerta.
+MEASURE '_Medidas'[Eventos en Alerta] =
+    COUNTROWS (
+        FILTER (
+            CALCULATETABLE ( VALUES ( fEventos[Evento_ID] ), KEEPFILTERS ( fEventos[Estado] = "Realizado" ) ),
+            [Alerta Evento] <> ""
+        )
+    )
+
+/// Color hexadecimal para formato condicional del margen por evento (rojo < 20 %, ámbar < 30 %, verde).
+MEASURE '_Medidas'[Color Margen Evento] =
+    VAR _m = [Margen por Evento %]
+    RETURN
+        SWITCH ( TRUE (), ISBLANK ( _m ), BLANK (), _m < 0.20, "#C0392B", _m < 0.30, "#D68910", "#1E8449" )
+
+// -------------------------------------------------------------------------------------
+// Carpeta: 5. Procedimientos
+// -------------------------------------------------------------------------------------
+
+/// Cotizaciones emitidas, contadas por FECHA DE COTIZACIÓN (relación inactiva).
+MEASURE '_Medidas'[Eventos Cotizados] =
+    CALCULATE (
+        COUNTROWS ( fEventos ),
+        USERELATIONSHIP ( fEventos[Fecha_Cotizacion], 'Fecha'[Fecha] )
+    )
+
+/// Cotizaciones del período (por fecha de cotización) que llegaron a contrato.
+MEASURE '_Medidas'[Cotizaciones Convertidas] =
+    CALCULATE (
+        COUNTROWS ( fEventos ),
+        USERELATIONSHIP ( fEventos[Fecha_Cotizacion], 'Fecha'[Fecha] ),
+        KEEPFILTERS ( NOT ISBLANK ( fEventos[Fecha_Contrato] ) )
+    )
+
+/// Tasa de conversión = cotizaciones convertidas en contrato / cotizaciones (por fecha de cotización).
+MEASURE '_Medidas'[Tasa de Conversión] =
+    DIVIDE ( [Cotizaciones Convertidas], [Eventos Cotizados] )
+
+/// Eventos con contrato firmado y no cancelados (por fecha del evento).
+MEASURE '_Medidas'[Eventos Contratados] =
+    COUNTROWS ( FILTER ( fEventos, NOT ISBLANK ( fEventos[Fecha_Contrato] ) && fEventos[Estado] <> "Cancelado" ) )
+
+/// Eventos contratados que recibieron anticipo antes o el día del evento.
+MEASURE '_Medidas'[Eventos con Anticipo] =
+    COUNTROWS (
+        FILTER (
+            fEventos,
+            NOT ISBLANK ( fEventos[Fecha_Contrato] ) && fEventos[Estado] <> "Cancelado"
+                && fEventos[Monto_Anticipo] > 0
+                && fEventos[Fecha_Anticipo] <= fEventos[Fecha_Evento]
+        )
+    )
+
+/// % de eventos contratados con anticipo recibido antes del evento.
+MEASURE '_Medidas'[% Eventos con Anticipo] =
+    DIVIDE ( [Eventos con Anticipo], [Eventos Contratados] )
+
+/// % de eventos contratados cuyo anticipo es al menos el 50 % de Invitados × Precio_Por_Persona (tolerancia 1 %).
+MEASURE '_Medidas'[% Anticipo 50% Cumplido] =
+    DIVIDE (
+        COUNTROWS (
+            FILTER (
+                fEventos,
+                NOT ISBLANK ( fEventos[Fecha_Contrato] ) && fEventos[Estado] <> "Cancelado"
+                    && fEventos[Monto_Anticipo] >= 0.495 * fEventos[Invitados] * fEventos[Precio_Por_Persona]
+            )
+        ),
+        [Eventos Contratados]
+    )
+
+/// Eventos realizados que ya tienen al menos una factura (cualquier fecha).
+MEASURE '_Medidas'[Eventos Facturados] =
+    COUNTROWS (
+        FILTER (
+            CALCULATETABLE ( VALUES ( fEventos[Evento_ID] ), KEEPFILTERS ( fEventos[Estado] = "Realizado" ) ),
+            VAR _id = fEventos[Evento_ID]
+            RETURN NOT ISEMPTY ( CALCULATETABLE ( fVentas, REMOVEFILTERS ( 'Fecha' ), dEvento[Evento_ID] = _id ) )
+        )
+    )
+
+/// Eventos facturados cuyo saldo por cobrar a hoy es cero (tolerancia RD$1).
+MEASURE '_Medidas'[Eventos Cobrados] =
+    COUNTROWS (
+        FILTER (
+            CALCULATETABLE ( VALUES ( fEventos[Evento_ID] ), KEEPFILTERS ( fEventos[Estado] = "Realizado" ) ),
+            VAR _id = fEventos[Evento_ID]
+            VAR _hayFactura = NOT ISEMPTY ( CALCULATETABLE ( fVentas, REMOVEFILTERS ( 'Fecha' ), dEvento[Evento_ID] = _id ) )
+            VAR _saldo = CALCULATE ( [CxC Total], REMOVEFILTERS ( 'Fecha' ), dEvento[Evento_ID] = _id )
+            RETURN _hayFactura && _saldo <= 1
+        )
+    )
+
+/// Días promedio entre cotización y contrato (eventos con ambas fechas).
+MEASURE '_Medidas'[Ciclo Cotización→Contrato (días)] =
+    AVERAGEX (
+        FILTER ( fEventos, NOT ISBLANK ( fEventos[Fecha_Cotizacion] ) && NOT ISBLANK ( fEventos[Fecha_Contrato] ) ),
+        INT ( fEventos[Fecha_Contrato] - fEventos[Fecha_Cotizacion] )
+    )
+
+/// Días promedio entre contrato y anticipo.
+MEASURE '_Medidas'[Ciclo Contrato→Anticipo (días)] =
+    AVERAGEX (
+        FILTER ( fEventos, NOT ISBLANK ( fEventos[Fecha_Contrato] ) && NOT ISBLANK ( fEventos[Fecha_Anticipo] ) ),
+        INT ( fEventos[Fecha_Anticipo] - fEventos[Fecha_Contrato] )
+    )
+
+/// Días promedio entre la fecha del evento y su primera factura (eventos realizados ya facturados). Meta: ≤ 2.
+MEASURE '_Medidas'[Ciclo Evento→Factura (días)] =
+    AVERAGEX (
+        FILTER ( fEventos, fEventos[Estado] = "Realizado" ),
+        VAR _id = fEventos[Evento_ID]
+        VAR _fact =
+            CALCULATE ( MIN ( fVentas[Fecha] ), REMOVEFILTERS ( 'Fecha' ), dEvento[Evento_ID] = _id, fVentas[Subtotal] > 0 )
+        RETURN IF ( NOT ISBLANK ( _fact ), INT ( _fact - fEventos[Fecha_Evento] ) )
+    )
+
+/// Días promedio entre la factura a crédito y el pago que la saldó (facturas del período ya cobradas a la fecha de corte).
+MEASURE '_Medidas'[Ciclo Factura→Cobro (días)] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        AVERAGEX (
+            FILTER ( fVentas, fVentas[Condicion] = "Credito" && fVentas[Subtotal] > 0 ),
+            VAR _n = fVentas[NCF]
+            // REMOVEFILTERS(fCobros) quita también los filtros de Fecha y dCliente que llegan a fCobros
+            VAR _cobrado = CALCULATE ( SUM ( fCobros[Monto_DOP] ), REMOVEFILTERS ( fCobros ), fCobros[NCF_Factura] = _n, fCobros[Fecha] <= _c )
+            VAR _ultimo = CALCULATE ( MAX ( fCobros[Fecha] ), REMOVEFILTERS ( fCobros ), fCobros[NCF_Factura] = _n, fCobros[Fecha] <= _c )
+            RETURN IF ( fVentas[Total_DOP] - _cobrado <= 1, INT ( _ultimo - fVentas[Fecha] ) )
+        )
+
+/// % de eventos realizados que siguieron el proceso completo: cotización ≤ contrato ≤ anticipo ≤ evento, anticipo ≥ 50 % y factura ≤ 3 días después del evento.
+MEASURE '_Medidas'[% Cumplimiento Proceso] =
+    AVERAGEX (
+        FILTER ( fEventos, fEventos[Estado] = "Realizado" ),
+        VAR _id = fEventos[Evento_ID]
+        VAR _fact = CALCULATE ( MIN ( fVentas[Fecha] ), REMOVEFILTERS ( 'Fecha' ), dEvento[Evento_ID] = _id, fVentas[Subtotal] > 0 )
+        VAR _ok =
+            NOT ISBLANK ( fEventos[Fecha_Cotizacion] ) && NOT ISBLANK ( fEventos[Fecha_Contrato] )
+                && NOT ISBLANK ( fEventos[Fecha_Anticipo] ) && NOT ISBLANK ( _fact )
+                && fEventos[Fecha_Cotizacion] <= fEventos[Fecha_Contrato]
+                && fEventos[Fecha_Contrato] <= fEventos[Fecha_Anticipo]
+                && fEventos[Fecha_Anticipo] <= fEventos[Fecha_Evento]
+                && fEventos[Monto_Anticipo] >= 0.495 * fEventos[Invitados] * fEventos[Precio_Por_Persona]
+                && _fact - fEventos[Fecha_Evento] <= 3
+        RETURN IF ( _ok, 1, 0 )
+    )
+
+/// Primer paso del proceso que UN evento no cumplió (vacío si cumple). Para la tabla de excepciones.
+MEASURE '_Medidas'[Paso Incumplido] =
+    IF (
+        HASONEVALUE ( fEventos[Evento_ID] ),
+        VAR _est = SELECTEDVALUE ( fEventos[Estado] )
+        VAR _ev = SELECTEDVALUE ( fEventos[Fecha_Evento] )
+        VAR _con = SELECTEDVALUE ( fEventos[Fecha_Contrato] )
+        VAR _ant = SELECTEDVALUE ( fEventos[Fecha_Anticipo] )
+        VAR _monto = SELECTEDVALUE ( fEventos[Monto_Anticipo] )
+        VAR _valor = SUMX ( fEventos, fEventos[Invitados] * fEventos[Precio_Por_Persona] )
+        VAR _hoy = [Hoy RD]
+        VAR _fact = CALCULATE ( MIN ( fVentas[Fecha] ), REMOVEFILTERS ( 'Fecha' ), TREATAS ( VALUES ( fEventos[Evento_ID] ), dEvento[Evento_ID] ), fVentas[Subtotal] > 0 )
+        VAR _saldo = CALCULATE ( [CxC Vencida], REMOVEFILTERS ( 'Fecha' ), TREATAS ( VALUES ( fEventos[Evento_ID] ), dEvento[Evento_ID] ) )
+        RETURN
+            SWITCH (
+                TRUE (),
+                _est = "Cancelado", "",
+                ISBLANK ( _con ) && _ev >= _hoy && _ev - _hoy <= 15, "Sin contrato a ≤ 15 días del evento",
+                NOT ISBLANK ( _con ) && ( ISBLANK ( _ant ) || _monto < 0.495 * _valor ) && _ev <= _hoy + 7, "Anticipo 50 % no recibido",
+                _est = "Realizado" && ISBLANK ( _fact ) && _hoy - _ev > 3, "Evento sin facturar > 3 días",
+                _saldo > 1, "Factura vencida sin cobrar",
+                ""
+            )
+    )
+
+// -------------------------------------------------------------------------------------
+// Carpeta: 6. Cuentas por cobrar y crédito
+// -------------------------------------------------------------------------------------
+
+/// [Auxiliar, oculta] Saldo de la(s) factura(s) en contexto a la fecha de corte = Total_DOP - cobros con NCF_Factura = NCF hasta el corte.
+/// Los anticipos se registran en fCobros contra el NCF de la factura del evento.
+MEASURE '_Medidas'[_Saldo Factura al Corte] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        SUMX (
+            CALCULATETABLE ( VALUES ( fVentas[NCF] ), REMOVEFILTERS ( 'Fecha' ) ),
+            VAR _n = fVentas[NCF]
+            VAR _total = CALCULATE ( SUM ( fVentas[Total_DOP] ), REMOVEFILTERS ( 'Fecha' ) )
+            VAR _cobrado = CALCULATE ( SUM ( fCobros[Monto_DOP] ), REMOVEFILTERS ( fCobros ), fCobros[NCF_Factura] = _n, fCobros[Fecha] <= _c )
+            RETURN _total - _cobrado
+        )
+
+/// Cuentas por cobrar a la fecha de corte: saldo de todas las facturas emitidas hasta el corte (no filtra por mes de factura).
+MEASURE '_Medidas'[CxC Total] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        SUMX (
+            CALCULATETABLE ( VALUES ( fVentas[NCF] ), REMOVEFILTERS ( 'Fecha' ), fVentas[Fecha] <= _c ),
+            [_Saldo Factura al Corte]
+        )
+
+/// CxC vencida: saldo de facturas cuyo vencimiento (Vence) es anterior a la fecha de corte.
+MEASURE '_Medidas'[CxC Vencida] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        SUMX (
+            CALCULATETABLE ( VALUES ( fVentas[NCF] ), REMOVEFILTERS ( 'Fecha' ), fVentas[Fecha] <= _c, fVentas[Vence] < _c ),
+            [_Saldo Factura al Corte]
+        )
+
+/// Antigüedad por días desde el vencimiento: 0-30 incluye las facturas aún por vencer.
+MEASURE '_Medidas'[CxC 0-30] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        SUMX (
+            CALCULATETABLE ( VALUES ( fVentas[NCF] ), REMOVEFILTERS ( 'Fecha' ), fVentas[Fecha] <= _c, fVentas[Vence] >= _c - 30 ),
+            [_Saldo Factura al Corte]
+        )
+
+/// Saldo vencido hace 31 a 60 días.
+MEASURE '_Medidas'[CxC 31-60] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        SUMX (
+            CALCULATETABLE (
+                VALUES ( fVentas[NCF] ), REMOVEFILTERS ( 'Fecha' ),
+                fVentas[Fecha] <= _c, fVentas[Vence] < _c - 30, fVentas[Vence] >= _c - 60
+            ),
+            [_Saldo Factura al Corte]
+        )
+
+/// Saldo vencido hace 61 a 90 días.
+MEASURE '_Medidas'[CxC 61-90] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        SUMX (
+            CALCULATETABLE (
+                VALUES ( fVentas[NCF] ), REMOVEFILTERS ( 'Fecha' ),
+                fVentas[Fecha] <= _c, fVentas[Vence] < _c - 60, fVentas[Vence] >= _c - 90
+            ),
+            [_Saldo Factura al Corte]
+        )
+
+/// Saldo vencido hace más de 90 días. Cualquier monto aquí corta el crédito del cliente.
+MEASURE '_Medidas'[CxC >90] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        SUMX (
+            CALCULATETABLE ( VALUES ( fVentas[NCF] ), REMOVEFILTERS ( 'Fecha' ), fVentas[Fecha] <= _c, fVentas[Vence] < _c - 90 ),
+            [_Saldo Factura al Corte]
+        )
+
+/// DSO = CxC total / facturado (con ITBIS) de los últimos 90 días × 90.
+MEASURE '_Medidas'[Días Promedio de Cobro (DSO)] =
+    VAR _c = [Fecha Corte]
+    VAR _fact90 = CALCULATE ( [Total Facturado RD$], DATESINPERIOD ( 'Fecha'[Fecha], _c, -90, DAY ) )
+    RETURN DIVIDE ( [CxC Total], _fact90 ) * 90
+
+/// Días promedio de atraso: facturas a crédito de los últimos 12 meses ya vencidas; atraso = fecha del pago que la saldó (o el corte si sigue abierta) - Vence, mínimo 0. Promedio simple por factura.
+MEASURE '_Medidas'[Días Promedio de Atraso] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        AVERAGEX (
+            CALCULATETABLE (
+                SUMMARIZE ( fVentas, fVentas[NCF], fVentas[Vence] ),
+                REMOVEFILTERS ( 'Fecha' ),
+                fVentas[Condicion] = "Credito", fVentas[Subtotal] > 0,
+                fVentas[Fecha] > EDATE ( _c, -12 ), fVentas[Vence] < _c
+            ),
+            VAR _n = fVentas[NCF]
+            VAR _saldo = [_Saldo Factura al Corte]
+            VAR _ultimo = CALCULATE ( MAX ( fCobros[Fecha] ), REMOVEFILTERS ( fCobros ), fCobros[NCF_Factura] = _n, fCobros[Fecha] <= _c )
+            VAR _fin = IF ( _saldo <= 1, _ultimo, _c )
+            RETURN MAX ( 0, INT ( _fin - fVentas[Vence] ) )
+        )
+
+/// Compra mensual promedio a crédito del cliente (facturado con ITBIS, últimos 6 meses ÷ 6).
+MEASURE '_Medidas'[Compra Mensual Promedio 6M] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        DIVIDE (
+            CALCULATE ( [Total Facturado RD$], DATESINPERIOD ( 'Fecha'[Fecha], _c, -6, MONTH ), fVentas[Condicion] = "Credito" ),
+            6
+        )
+
+/// Límite de crédito aprobado hoy (ficha del cliente).
+MEASURE '_Medidas'[Límite Actual] =
+    SUM ( dCliente[Limite_Credito] )
+
+/// [Auxiliar, oculta] Límite sugerido para UN cliente. Fórmula:
+///   base   = Compra Mensual Promedio 6M × (Dias_Credito / 30)          (lo que normalmente debe en su plazo)
+///   factor = 1.5 si atraso ≤ 5 días; 1.2 si ≤ 15; 1.0 si ≤ 30; 0.6 si ≤ 60; 0.3 si > 60 (sin historial: 1.0)
+///   límite = MIN(base × factor, RD$1,200,000), redondeado hacia abajo a RD$10,000
+///   Cliente nuevo (< 3 facturas a crédito en 12 meses): MIN(Límite Actual, RD$150,000).
+///   Contado (Dias_Credito = 0): 0. Cualquier saldo vencido > 90 días: 0.
+MEASURE '_Medidas'[_Límite Sugerido Cliente] =
+    VAR _c = [Fecha Corte]
+    VAR _tope = 1200000
+    VAR _topeNuevo = 150000
+    VAR _dias = SELECTEDVALUE ( dCliente[Dias_Credito], 0 )
+    VAR _nFact =
+        CALCULATE (
+            COUNTROWS ( fVentas ), REMOVEFILTERS ( 'Fecha' ),
+            fVentas[Condicion] = "Credito", fVentas[Subtotal] > 0, fVentas[Fecha] > EDATE ( _c, -12 ), fVentas[Fecha] <= _c
+        )
+    VAR _atraso = [Días Promedio de Atraso]
+    VAR _factor =
+        SWITCH ( TRUE (), ISBLANK ( _atraso ), 1.0, _atraso <= 5, 1.5, _atraso <= 15, 1.2, _atraso <= 30, 1.0, _atraso <= 60, 0.6, 0.3 )
+    VAR _base = [Compra Mensual Promedio 6M] * DIVIDE ( _dias, 30 )
+    VAR _calc = IF ( _nFact < 3, MIN ( [Límite Actual], _topeNuevo ), MIN ( _base * _factor, _tope ) )
+    RETURN
+        IF ( _dias = 0 || [CxC >90] > 0, 0, FLOOR ( _calc, 10000 ) )
+
+/// Límite de crédito sugerido (ver fórmula en _Límite Sugerido Cliente). En totales suma los límites de cada cliente.
+MEASURE '_Medidas'[Límite Sugerido] =
+    SUMX ( VALUES ( dCliente[RNC_Cliente] ), [_Límite Sugerido Cliente] )
+
+/// Uso del límite aprobado = CxC total / límite actual.
+MEASURE '_Medidas'[Uso de Límite %] =
+    DIVIDE ( [CxC Total], [Límite Actual] )
+
+/// 1 si la deuda del cliente supera su límite aprobado. En totales = cantidad de clientes que lo exceden.
+MEASURE '_Medidas'[Excede Límite] =
+    SUMX (
+        VALUES ( dCliente[RNC_Cliente] ),
+        IF ( [CxC Total] > [Límite Actual], 1, 0 )
+    )
+
+/// Cantidad de clientes que exceden su límite (para tarjetas).
+MEASURE '_Medidas'[Clientes que Exceden Límite] =
+    [Excede Límite]
+
+/// 1 = suspender crédito: saldo vencido > 90 días, o excede el límite y tiene algo vencido. En totales = cantidad de clientes.
+MEASURE '_Medidas'[Suspender Crédito] =
+    SUMX (
+        VALUES ( dCliente[RNC_Cliente] ),
+        IF ( [CxC >90] > 0 || ( [CxC Total] > [Límite Actual] && [CxC Vencida] > 0 ), 1, 0 )
+    )
+
+/// Cantidad de clientes a los que se debe suspender el crédito (para tarjetas).
+MEASURE '_Medidas'[Clientes a Suspender] =
+    [Suspender Crédito]
+
+// -------------------------------------------------------------------------------------
+// Carpeta: 7. Inventario
+// -------------------------------------------------------------------------------------
+
+/// Valor del inventario actual = Σ Stock_Actual × Costo_Unitario (foto; no depende de la fecha).
+MEASURE '_Medidas'[Valor Inventario] =
+    SUMX ( dProducto, dProducto[Stock_Actual] * dProducto[Costo_Unitario] )
+
+/// Productos con Stock_Actual por debajo de Stock_Minimo.
+MEASURE '_Medidas'[Ítems Bajo Mínimo] =
+    COUNTROWS ( FILTER ( dProducto, dProducto[Stock_Actual] < dProducto[Stock_Minimo] ) )
+
+/// Valor de las salidas a eventos (Cantidad × costo unitario actual).
+MEASURE '_Medidas'[Valor Salidas] =
+    CALCULATE (
+        SUMX ( fMovInventario, fMovInventario[Cantidad] * RELATED ( dProducto[Costo_Unitario] ) ),
+        KEEPFILTERS ( fMovInventario[Tipo_Mov] = "Salida" )
+    )
+
+/// Valor de la merma (producto dañado, vencido o sobrante botado).
+MEASURE '_Medidas'[Valor Merma] =
+    CALCULATE (
+        SUMX ( fMovInventario, fMovInventario[Cantidad] * RELATED ( dProducto[Costo_Unitario] ) ),
+        KEEPFILTERS ( fMovInventario[Tipo_Mov] = "Merma" )
+    )
+
+/// Merma % = valor merma / (valor salidas + valor merma).
+MEASURE '_Medidas'[Merma %] =
+    DIVIDE ( [Valor Merma], [Valor Salidas] + [Valor Merma] )
+
+/// Consumo diario promedio en valor (salidas + merma) de los 30 días hasta la fecha de corte.
+MEASURE '_Medidas'[Consumo Diario 30D] =
+    VAR _c = [Fecha Corte]
+    RETURN DIVIDE ( CALCULATE ( [Valor Salidas] + [Valor Merma], DATESINPERIOD ( 'Fecha'[Fecha], _c, -30, DAY ) ), 30 )
+
+/// Consumo diario promedio en unidades (salidas + merma), 30 días hasta el corte. Usar por producto.
+MEASURE '_Medidas'[Consumo Diario 30D (unidades)] =
+    VAR _c = [Fecha Corte]
+    RETURN
+        DIVIDE (
+            CALCULATE (
+                SUM ( fMovInventario[Cantidad] ),
+                DATESINPERIOD ( 'Fecha'[Fecha], _c, -30, DAY ),
+                KEEPFILTERS ( fMovInventario[Tipo_Mov] IN { "Salida", "Merma" } )
+            ),
+            30
+        )
+
+/// Días de inventario = valor del inventario / consumo diario en valor.
+MEASURE '_Medidas'[Días de Inventario] =
+    DIVIDE ( [Valor Inventario], [Consumo Diario 30D] )
+
+/// Cantidad a reordenar por producto: si Stock_Actual ≤ Stock_Minimo + consumo × 3 días de entrega, pedir hasta Stock_Minimo + consumo × 14 días. Redondeado hacia arriba. Usar por producto (unidades distintas no se suman con sentido).
+MEASURE '_Medidas'[Cantidad a Reordenar] =
+    VAR _entrega = 3
+    VAR _cobertura = 14
+    RETURN
+        SUMX (
+            dProducto,
+            VAR _cons = [Consumo Diario 30D (unidades)]
+            VAR _punto = dProducto[Stock_Minimo] + _cons * _entrega
+            VAR _objetivo = dProducto[Stock_Minimo] + _cons * _cobertura
+            RETURN IF ( dProducto[Stock_Actual] <= _punto, ROUNDUP ( _objetivo - dProducto[Stock_Actual], 0 ) )
+        )
+
+/// Valor de la compra sugerida = Cantidad a Reordenar × Costo_Unitario (sí se suma entre productos).
+MEASURE '_Medidas'[Valor a Reordenar] =
+    SUMX ( dProducto, [Cantidad a Reordenar] * dProducto[Costo_Unitario] )
+
+/// Productos con cantidad a reordenar > 0.
+MEASURE '_Medidas'[Ítems a Reordenar] =
+    COUNTROWS ( FILTER ( dProducto, [Cantidad a Reordenar] > 0 ) )
+
+// -------------------------------------------------------------------------------------
+// Carpeta: 8. e-CF y cumplimiento
+// -------------------------------------------------------------------------------------
+
+/// % de comprobantes de venta emitidos como e-CF (Tipo_NCF E..), por cantidad.
+MEASURE '_Medidas'[% Ventas emitidas como e-CF] =
+    DIVIDE ( CALCULATE ( COUNTROWS ( fVentas ), KEEPFILTERS ( dTipoNCF[Es_eCF] = TRUE () ) ), COUNTROWS ( fVentas ) )
+
+/// % del monto de ventas (Total RD$) emitido como e-CF.
+MEASURE '_Medidas'[% Ventas e-CF (monto)] =
+    DIVIDE ( CALCULATE ( [Total Facturado RD$], KEEPFILTERS ( dTipoNCF[Es_eCF] = TRUE () ) ), [Total Facturado RD$] )
+
+/// % de facturas de compra recibidas como e-CF, por cantidad.
+MEASURE '_Medidas'[% Compras recibidas como e-CF] =
+    DIVIDE ( CALCULATE ( COUNTROWS ( fCompras ), KEEPFILTERS ( dTipoNCF[Es_eCF] = TRUE () ) ), COUNTROWS ( fCompras ) )
+
+/// Suplidores con compras en el período que todavía no emiten e-CF (dSuplidor[Emite_eCF] = "No").
+MEASURE '_Medidas'[Suplidores sin e-CF] =
+    CALCULATE ( DISTINCTCOUNT ( fCompras[RNC_Suplidor] ), KEEPFILTERS ( dSuplidor[Emite_eCF] = "No" ) )
+
+/// Días que faltan para la fecha límite e-CF (15-nov-2026). Negativo = vencida.
+MEASURE '_Medidas'[Días para fecha límite e-CF] =
+    INT ( [Fecha Límite e-CF] - [Hoy RD] )
+
+/// Documentos de venta o compra que no llegaron a la base limpia o fallan una regla de validación.
+MEASURE '_Medidas'[Facturas con Problemas de Validación] =
+    COUNTROWS ( fValidacion )
+
+/// Monto RD$ de los documentos con problemas de validación (no incluido en ventas ni compras).
+MEASURE '_Medidas'[Monto con Problemas de Validación] =
+    SUM ( fValidacion[Total_DOP] )
+
+/// Último secuencial de NCF de venta usado (por tipo), en toda la historia.
+MEASURE '_Medidas'[Último Secuencial NCF] =
+    CALCULATE ( MAX ( fVentas[Secuencial] ), REMOVEFILTERS ( 'Fecha' ) )
+
+/// % usado de la secuencia autorizada vigente = (último - desde + 1) / (hasta - desde + 1). Por Tipo_NCF.
+MEASURE '_Medidas'[% Secuencia NCF Usada] =
+    IF (
+        HASONEVALUE ( dTipoNCF[Tipo_NCF] ),
+        VAR _desde = SELECTEDVALUE ( dTipoNCF[Sec_Desde] )
+        VAR _hasta = SELECTEDVALUE ( dTipoNCF[Sec_Hasta] )
+        VAR _ult = [Último Secuencial NCF]
+        RETURN IF ( NOT ISBLANK ( _hasta ) && NOT ISBLANK ( _ult ), DIVIDE ( _ult - _desde + 1, _hasta - _desde + 1 ) )
+    )
+
+/// NCF que quedan en las secuencias autorizadas vigentes (suma por tipo).
+MEASURE '_Medidas'[NCF Disponibles] =
+    SUMX (
+        FILTER ( VALUES ( dTipoNCF[Tipo_NCF] ), NOT ISBLANK ( CALCULATE ( MAX ( dTipoNCF[Sec_Hasta] ) ) ) ),
+        VAR _hasta = CALCULATE ( MAX ( dTipoNCF[Sec_Hasta] ) )
+        VAR _desde = CALCULATE ( MAX ( dTipoNCF[Sec_Desde] ) )
+        VAR _ult = COALESCE ( [Último Secuencial NCF], _desde - 1 )
+        RETURN _hasta - _ult
+    )
+
+/// Días hasta el vencimiento de la secuencia autorizada (la más próxima en el contexto).
+MEASURE '_Medidas'[Días para Vencer Secuencia] =
+    VAR _v = MIN ( dTipoNCF[Sec_Vence] )
+    RETURN IF ( NOT ISBLANK ( _v ), INT ( _v - [Hoy RD] ) )
+
+// -------------------------------------------------------------------------------------
+// Prueba rápida: ejecutar en la vista de consulta DAX después de cargar.
+// Compara con la base limpia (ver README.md, "Antes de publicar").
+// -------------------------------------------------------------------------------------
+EVALUATE
+ROW (
+    "Ventas RD$", [Ventas RD$],
+    "Total Facturado RD$", [Total Facturado RD$],
+    "Compras Total RD$", [Compras Total RD$],
+    "ITBIS Ventas", [ITBIS Ventas],
+    "Margen Neto %", [Margen Neto %],
+    "Beneficio por Quincena USD", [Beneficio por Quincena USD],
+    "CxC Total", [CxC Total],
+    "Valor Inventario", [Valor Inventario],
+    "% Ventas e-CF", [% Ventas emitidas como e-CF],
+    "Días para fecha límite e-CF", [Días para fecha límite e-CF]
+)
