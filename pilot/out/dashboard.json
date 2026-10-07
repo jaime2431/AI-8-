@@ -1,0 +1,1624 @@
+{
+ "company": {
+  "name": "Sabor & Escena Catering SRL (ficticia)",
+  "rnc": "135149996",
+  "city": "Santo Domingo Este",
+  "erp": "Monica 10 (facturación e inventario) + Excel; e-CF aún no emitido",
+  "employees_fixed": 12,
+  "employees_per_event": 88
+ },
+ "today": "2026-10-07",
+ "rate": [
+  60.8522,
+  61.4111
+ ],
+ "kpi": {
+  "revenue_12m": 24739650,
+  "profit_12m": 7455573,
+  "margin": 0.3014,
+  "avg_profit_usd": 5155,
+  "below_goal": 13,
+  "events": 82,
+  "ar_total": 1816025,
+  "ar_overdue": 536704,
+  "inventory_value": 220161,
+  "below_min": 2
+ },
+ "months": [
+  "2025-10",
+  "2025-11",
+  "2025-12",
+  "2026-01",
+  "2026-02",
+  "2026-03",
+  "2026-04",
+  "2026-05",
+  "2026-06",
+  "2026-07",
+  "2026-08",
+  "2026-09"
+ ],
+ "quincenas": [
+  {
+   "k": "2025-10-Q1",
+   "label": "oct 1",
+   "year": 2025,
+   "rev": 1155350,
+   "profit_usd": 2076
+  },
+  {
+   "k": "2025-10-Q2",
+   "label": "oct 2",
+   "year": 2025,
+   "rev": 1642350,
+   "profit_usd": 8301
+  },
+  {
+   "k": "2025-11-Q1",
+   "label": "nov 1",
+   "year": 2025,
+   "rev": 765700,
+   "profit_usd": -2142
+  },
+  {
+   "k": "2025-11-Q2",
+   "label": "nov 2",
+   "year": 2025,
+   "rev": 377950,
+   "profit_usd": -4184
+  },
+  {
+   "k": "2025-12-Q1",
+   "label": "dic 1",
+   "year": 2025,
+   "rev": 1865900,
+   "profit_usd": 9134
+  },
+  {
+   "k": "2025-12-Q2",
+   "label": "dic 2",
+   "year": 2025,
+   "rev": 2761700,
+   "profit_usd": 19434
+  },
+  {
+   "k": "2026-01-Q1",
+   "label": "ene 1",
+   "year": 2026,
+   "rev": 870950,
+   "profit_usd": -1150
+  },
+  {
+   "k": "2026-01-Q2",
+   "label": "ene 2",
+   "year": 2026,
+   "rev": 1025600,
+   "profit_usd": 1939
+  },
+  {
+   "k": "2026-02-Q1",
+   "label": "feb 1",
+   "year": 2026,
+   "rev": 592000,
+   "profit_usd": -4070
+  },
+  {
+   "k": "2026-02-Q2",
+   "label": "feb 2",
+   "year": 2026,
+   "rev": 1245900,
+   "profit_usd": 4458
+  },
+  {
+   "k": "2026-03-Q1",
+   "label": "mar 1",
+   "year": 2026,
+   "rev": 720800,
+   "profit_usd": -2802
+  },
+  {
+   "k": "2026-03-Q2",
+   "label": "mar 2",
+   "year": 2026,
+   "rev": 684450,
+   "profit_usd": -1676
+  },
+  {
+   "k": "2026-04-Q1",
+   "label": "abr 1",
+   "year": 2026,
+   "rev": 210000,
+   "profit_usd": -7889
+  },
+  {
+   "k": "2026-04-Q2",
+   "label": "abr 2",
+   "year": 2026,
+   "rev": 1203850,
+   "profit_usd": 4135
+  },
+  {
+   "k": "2026-05-Q1",
+   "label": "may 1",
+   "year": 2026,
+   "rev": 437450,
+   "profit_usd": -5381
+  },
+  {
+   "k": "2026-05-Q2",
+   "label": "may 2",
+   "year": 2026,
+   "rev": 272000,
+   "profit_usd": -5074
+  },
+  {
+   "k": "2026-06-Q1",
+   "label": "jun 1",
+   "year": 2026,
+   "rev": 583800,
+   "profit_usd": -4011
+  },
+  {
+   "k": "2026-06-Q2",
+   "label": "jun 2",
+   "year": 2026,
+   "rev": 1580300,
+   "profit_usd": 7998
+  },
+  {
+   "k": "2026-07-Q1",
+   "label": "jul 1",
+   "year": 2026,
+   "rev": 1445000,
+   "profit_usd": 4755
+  },
+  {
+   "k": "2026-07-Q2",
+   "label": "jul 2",
+   "year": 2026,
+   "rev": 639900,
+   "profit_usd": -1491
+  },
+  {
+   "k": "2026-08-Q1",
+   "label": "ago 1",
+   "year": 2026,
+   "rev": 2061650,
+   "profit_usd": 10985
+  },
+  {
+   "k": "2026-08-Q2",
+   "label": "ago 2",
+   "year": 2026,
+   "rev": 336300,
+   "profit_usd": -4491
+  },
+  {
+   "k": "2026-09-Q1",
+   "label": "sep 1",
+   "year": 2026,
+   "rev": 1171750,
+   "profit_usd": 1710
+  },
+  {
+   "k": "2026-09-Q2",
+   "label": "sep 2",
+   "year": 2026,
+   "rev": 1089000,
+   "profit_usd": 3363
+  }
+ ],
+ "sales_by_type": {
+  "Corporativo": [
+   1595950,
+   157350,
+   1850750,
+   945150,
+   1246997,
+   812750,
+   931650,
+   354950,
+   1059500,
+   1064900,
+   1048800,
+   893270
+  ],
+  "Concierto": [
+   766250,
+   0,
+   1816600,
+   958100,
+   0,
+   0,
+   0,
+   0,
+   0,
+   740942,
+   838600,
+   815400
+  ],
+  "Boda": [
+   0,
+   427500,
+   722000,
+   0,
+   380550,
+   468000,
+   0,
+   651500,
+   321600,
+   482400,
+   0,
+   506150
+  ],
+  "Social": [
+   261900,
+   467250,
+   0,
+   480450,
+   192700,
+   124500,
+   0,
+   185200,
+   0,
+   537600,
+   510550,
+   0
+  ]
+ },
+ "type_margin": {
+  "Corporativo": {
+   "events": 42,
+   "rev": 12295650,
+   "margin_pct": 59.4,
+   "ticket": 1633
+  },
+  "Concierto": {
+   "events": 8,
+   "rev": 5977950,
+   "margin_pct": 60.2,
+   "ticket": 1317
+  },
+  "Boda": {
+   "events": 10,
+   "rev": 3959700,
+   "margin_pct": 56.9,
+   "ticket": 2213
+  },
+  "Social": {
+   "events": 22,
+   "rev": 2760150,
+   "margin_pct": 56.1,
+   "ticket": 1421
+  }
+ },
+ "events": [
+  {
+   "id": "EV-0003",
+   "date": "2025-10-08",
+   "type": "Corporativo",
+   "client": "Universidad Tecnológica del Este",
+   "guests": 159,
+   "rev": 278250,
+   "food_pct": 22.5,
+   "staff_pct": 10.3,
+   "margin_pct": 61.9
+  },
+  {
+   "id": "EV-0002",
+   "date": "2025-10-10",
+   "type": "Corporativo",
+   "client": "Telecomunicaciones del Caribe SA",
+   "guests": 309,
+   "rev": 509850,
+   "food_pct": 22.2,
+   "staff_pct": 9.6,
+   "margin_pct": 62.8
+  },
+  {
+   "id": "EV-0006",
+   "date": "2025-10-12",
+   "type": "Corporativo",
+   "client": "Seguros Bahía Azul SA",
+   "guests": 139,
+   "rev": 236300,
+   "food_pct": 25.2,
+   "staff_pct": 10.6,
+   "margin_pct": 58.6
+  },
+  {
+   "id": "EV-0009",
+   "date": "2025-10-13",
+   "type": "Social",
+   "client": "Ana Martínez Rodríguez",
+   "guests": 97,
+   "rev": 130950,
+   "food_pct": 26.5,
+   "staff_pct": 12.4,
+   "margin_pct": 56.7
+  },
+  {
+   "id": "EV-0004",
+   "date": "2025-10-17",
+   "type": "Corporativo",
+   "client": "Textiles Zona Este SRL",
+   "guests": 154,
+   "rev": 277200,
+   "food_pct": 27.8,
+   "staff_pct": 9.7,
+   "margin_pct": 58.5
+  },
+  {
+   "id": "EV-0010",
+   "date": "2025-10-17",
+   "type": "Social",
+   "client": "Yokasta Vásquez Germán",
+   "guests": 97,
+   "rev": 130950,
+   "food_pct": 23.9,
+   "staff_pct": 12.3,
+   "margin_pct": 60.1
+  },
+  {
+   "id": "EV-0005",
+   "date": "2025-10-19",
+   "type": "Corporativo",
+   "client": "Industrias Plásticas del Cibao SRL",
+   "guests": 203,
+   "rev": 294350,
+   "food_pct": 25.1,
+   "staff_pct": 10.7,
+   "margin_pct": 58.4
+  },
+  {
+   "id": "EV-0001",
+   "date": "2025-10-24",
+   "type": "Corporativo",
+   "client": "Textiles Zona Este SRL",
+   "guests": 112,
+   "rev": 173600,
+   "food_pct": 24.5,
+   "staff_pct": 10.5,
+   "margin_pct": 58.9
+  },
+  {
+   "id": "EV-0007",
+   "date": "2025-10-25",
+   "type": "Concierto",
+   "client": "Bachata Fest Producciones SRL",
+   "guests": 471,
+   "rev": 494550,
+   "food_pct": 22.4,
+   "staff_pct": 14.9,
+   "margin_pct": 59.1
+  },
+  {
+   "id": "EV-0008",
+   "date": "2025-10-27",
+   "type": "Concierto",
+   "client": "Caribe Stage Events SRL",
+   "guests": 247,
+   "rev": 271700,
+   "food_pct": 24.5,
+   "staff_pct": 17.2,
+   "margin_pct": 54.1
+  },
+  {
+   "id": "EV-0014",
+   "date": "2025-11-08",
+   "type": "Social",
+   "client": "Yokasta Núñez Pérez",
+   "guests": 122,
+   "rev": 183000,
+   "food_pct": 22.8,
+   "staff_pct": 10.9,
+   "margin_pct": 62.3
+  },
+  {
+   "id": "EV-0012",
+   "date": "2025-11-15",
+   "type": "Boda",
+   "client": "Carmen Fernández Vásquez",
+   "guests": 171,
+   "rev": 427500,
+   "food_pct": 27.4,
+   "staff_pct": 9.3,
+   "margin_pct": 58.2
+  },
+  {
+   "id": "EV-0013",
+   "date": "2025-11-15",
+   "type": "Social",
+   "client": "Rosa Rodríguez Guzmán",
+   "guests": 97,
+   "rev": 155200,
+   "food_pct": 24.5,
+   "staff_pct": 12.1,
+   "margin_pct": 59.8
+  },
+  {
+   "id": "EV-0011",
+   "date": "2025-11-29",
+   "type": "Boda",
+   "client": "Félix Mejía Ramírez",
+   "guests": 131,
+   "rev": 248900,
+   "food_pct": 26.0,
+   "staff_pct": 12.2,
+   "margin_pct": 57.4
+  },
+  {
+   "id": "EV-0015",
+   "date": "2025-11-29",
+   "type": "Social",
+   "client": "Altagracia Pérez Fernández",
+   "guests": 89,
+   "rev": 129050,
+   "food_pct": 27.2,
+   "staff_pct": 13.2,
+   "margin_pct": 54.5
+  },
+  {
+   "id": "EV-0021",
+   "date": "2025-12-02",
+   "type": "Corporativo",
+   "client": "Textiles Zona Este SRL",
+   "guests": 313,
+   "rev": 547750,
+   "food_pct": 24.7,
+   "staff_pct": 9.0,
+   "margin_pct": 62.4
+  },
+  {
+   "id": "EV-0017",
+   "date": "2025-12-11",
+   "type": "Corporativo",
+   "client": "Distribuidora Automotriz Duarte SRL",
+   "guests": 147,
+   "rev": 227850,
+   "food_pct": 29.5,
+   "staff_pct": 11.8,
+   "margin_pct": 54.9
+  },
+  {
+   "id": "EV-0026",
+   "date": "2025-12-13",
+   "type": "Concierto",
+   "client": "Global Tours Dominicana SRL",
+   "guests": 632,
+   "rev": 790000,
+   "food_pct": 21.5,
+   "staff_pct": 12.8,
+   "margin_pct": 61.0
+  },
+  {
+   "id": "EV-0028",
+   "date": "2025-12-13",
+   "type": "Social",
+   "client": "Carmen Germán Mejía",
+   "guests": 53,
+   "rev": 66250,
+   "food_pct": 24.1,
+   "staff_pct": 15.8,
+   "margin_pct": 54.7
+  },
+  {
+   "id": "EV-0016",
+   "date": "2025-12-14",
+   "type": "Corporativo",
+   "client": "Telecomunicaciones del Caribe SA",
+   "guests": 151,
+   "rev": 234050,
+   "food_pct": 26.4,
+   "staff_pct": 10.3,
+   "margin_pct": 58.8
+  },
+  {
+   "id": "EV-0020",
+   "date": "2025-12-18",
+   "type": "Corporativo",
+   "client": "Farmacéutica Quisqueya SRL",
+   "guests": 85,
+   "rev": 127500,
+   "food_pct": 24.9,
+   "staff_pct": 14.6,
+   "margin_pct": 55.4
+  },
+  {
+   "id": "EV-0025",
+   "date": "2025-12-22",
+   "type": "Concierto",
+   "client": "Producciones Merengue Live SRL",
+   "guests": 708,
+   "rev": 1026600,
+   "food_pct": 24.0,
+   "staff_pct": 10.4,
+   "margin_pct": 61.2
+  },
+  {
+   "id": "EV-0023",
+   "date": "2025-12-23",
+   "type": "Corporativo",
+   "client": "Textiles Zona Este SRL",
+   "guests": 131,
+   "rev": 189950,
+   "food_pct": 21.1,
+   "staff_pct": 12.6,
+   "margin_pct": 61.9
+  },
+  {
+   "id": "EV-0019",
+   "date": "2025-12-26",
+   "type": "Corporativo",
+   "client": "Constructora Bávaro Hills SRL",
+   "guests": 188,
+   "rev": 291400,
+   "food_pct": 28.2,
+   "staff_pct": 10.0,
+   "margin_pct": 56.6
+  },
+  {
+   "id": "EV-0022",
+   "date": "2025-12-26",
+   "type": "Corporativo",
+   "client": "Textiles Zona Este SRL",
+   "guests": 202,
+   "rev": 292900,
+   "food_pct": 23.9,
+   "staff_pct": 10.3,
+   "margin_pct": 60.0
+  },
+  {
+   "id": "EV-0024",
+   "date": "2025-12-26",
+   "type": "Corporativo",
+   "client": "Seguros Bahía Azul SA",
+   "guests": 101,
+   "rev": 186850,
+   "food_pct": 25.2,
+   "staff_pct": 11.8,
+   "margin_pct": 58.3
+  },
+  {
+   "id": "EV-0018",
+   "date": "2025-12-27",
+   "type": "Corporativo",
+   "client": "Distribuidora Automotriz Duarte SRL",
+   "guests": 102,
+   "rev": 173400,
+   "food_pct": 34.4,
+   "staff_pct": 10.6,
+   "margin_pct": 50.5
+  },
+  {
+   "id": "EV-0027",
+   "date": "2025-12-27",
+   "type": "Boda",
+   "client": "Carlos Almonte Tavárez",
+   "guests": 249,
+   "rev": 473100,
+   "food_pct": 28.1,
+   "staff_pct": 10.4,
+   "margin_pct": 57.7
+  },
+  {
+   "id": "EV-0033",
+   "date": "2026-01-01",
+   "type": "Social",
+   "client": "Dahiana Rosario Santos",
+   "guests": 87,
+   "rev": 117450,
+   "food_pct": 27.2,
+   "staff_pct": 14.0,
+   "margin_pct": 54.0
+  },
+  {
+   "id": "EV-0029",
+   "date": "2026-01-03",
+   "type": "Corporativo",
+   "client": "Grupo Hotelero Costa Ámbar SA",
+   "guests": 183,
+   "rev": 301950,
+   "food_pct": 26.6,
+   "staff_pct": 11.9,
+   "margin_pct": 55.7
+  },
+  {
+   "id": "EV-0030",
+   "date": "2026-01-03",
+   "type": "Corporativo",
+   "client": "Distribuidora Automotriz Duarte SRL",
+   "guests": 117,
+   "rev": 222300,
+   "food_pct": 22.6,
+   "staff_pct": 9.3,
+   "margin_pct": 64.3
+  },
+  {
+   "id": "EV-0034",
+   "date": "2026-01-11",
+   "type": "Social",
+   "client": "Esther Rodríguez Fernández",
+   "guests": 131,
+   "rev": 229250,
+   "food_pct": 25.4,
+   "staff_pct": 9.9,
+   "margin_pct": 58.9
+  },
+  {
+   "id": "EV-0031",
+   "date": "2026-01-16",
+   "type": "Concierto",
+   "client": "Caribe Stage Events SRL",
+   "guests": 737,
+   "rev": 958100,
+   "food_pct": 26.5,
+   "staff_pct": 11.4,
+   "margin_pct": 57.0
+  },
+  {
+   "id": "EV-0032",
+   "date": "2026-01-31",
+   "type": "Social",
+   "client": "Luis Mejía Almonte",
+   "guests": 54,
+   "rev": 67500,
+   "food_pct": 28.9,
+   "staff_pct": 18.1,
+   "margin_pct": 47.4
+  },
+  {
+   "id": "EV-0035",
+   "date": "2026-02-06",
+   "type": "Corporativo",
+   "client": "Textiles Zona Este SRL",
+   "guests": 298,
+   "rev": 521500,
+   "food_pct": 27.8,
+   "staff_pct": 9.5,
+   "margin_pct": 58.9
+  },
+  {
+   "id": "EV-0039",
+   "date": "2026-02-07",
+   "type": "Social",
+   "client": "Pedro Almonte Rodríguez",
+   "guests": 47,
+   "rev": 70500,
+   "food_pct": 36.0,
+   "staff_pct": 16.5,
+   "margin_pct": 43.1
+  },
+  {
+   "id": "EV-0038",
+   "date": "2026-02-21",
+   "type": "Boda",
+   "client": "Juana Batista Núñez",
+   "guests": 177,
+   "rev": 380550,
+   "food_pct": 28.5,
+   "staff_pct": 10.2,
+   "margin_pct": 57.3
+  },
+  {
+   "id": "EV-0040",
+   "date": "2026-02-21",
+   "type": "Social",
+   "client": "Yokasta Martínez Santos",
+   "guests": 94,
+   "rev": 122200,
+   "food_pct": 29.2,
+   "staff_pct": 14.6,
+   "margin_pct": 50.6
+  },
+  {
+   "id": "EV-0036",
+   "date": "2026-02-23",
+   "type": "Corporativo",
+   "client": "Constructora Bávaro Hills SRL",
+   "guests": 293,
+   "rev": 512750,
+   "food_pct": 27.1,
+   "staff_pct": 8.5,
+   "margin_pct": 60.2
+  },
+  {
+   "id": "EV-0037",
+   "date": "2026-02-23",
+   "type": "Corporativo",
+   "client": "Banco Comercial del Ozama SA",
+   "guests": 128,
+   "rev": 230400,
+   "food_pct": 23.5,
+   "staff_pct": 11.1,
+   "margin_pct": 61.5
+  },
+  {
+   "id": "EV-0043",
+   "date": "2026-03-04",
+   "type": "Corporativo",
+   "client": "Grupo Hotelero Costa Ámbar SA",
+   "guests": 245,
+   "rev": 343000,
+   "food_pct": 25.3,
+   "staff_pct": 11.6,
+   "margin_pct": 58.3
+  },
+  {
+   "id": "EV-0042",
+   "date": "2026-03-13",
+   "type": "Corporativo",
+   "client": "Banco Comercial del Ozama SA",
+   "guests": 149,
+   "rev": 253300,
+   "food_pct": 25.3,
+   "staff_pct": 10.1,
+   "margin_pct": 58.7
+  },
+  {
+   "id": "EV-0045",
+   "date": "2026-03-13",
+   "type": "Social",
+   "client": "Francisco Peña Martínez",
+   "guests": 83,
+   "rev": 124500,
+   "food_pct": 28.9,
+   "staff_pct": 13.0,
+   "margin_pct": 53.4
+  },
+  {
+   "id": "EV-0044",
+   "date": "2026-03-21",
+   "type": "Boda",
+   "client": "Félix Fernández Martínez",
+   "guests": 234,
+   "rev": 468000,
+   "food_pct": 33.9,
+   "staff_pct": 10.9,
+   "margin_pct": 50.6
+  },
+  {
+   "id": "EV-0041",
+   "date": "2026-03-23",
+   "type": "Corporativo",
+   "client": "Consultores Jurídicos Gazcue SRL",
+   "guests": 117,
+   "rev": 216450,
+   "food_pct": 25.8,
+   "staff_pct": 10.1,
+   "margin_pct": 58.6
+  },
+  {
+   "id": "EV-0047",
+   "date": "2026-04-14",
+   "type": "Corporativo",
+   "client": "Textiles Zona Este SRL",
+   "guests": 140,
+   "rev": 210000,
+   "food_pct": 36.4,
+   "staff_pct": 10.5,
+   "margin_pct": 48.0
+  },
+  {
+   "id": "EV-0046",
+   "date": "2026-04-18",
+   "type": "Corporativo",
+   "client": "Universidad Tecnológica del Este",
+   "guests": 258,
+   "rev": 412800,
+   "food_pct": 22.4,
+   "staff_pct": 10.2,
+   "margin_pct": 63.9
+  },
+  {
+   "id": "EV-0050",
+   "date": "2026-04-18",
+   "type": "Social",
+   "client": "Carmen Batista Fernández",
+   "guests": 79,
+   "rev": 102700,
+   "food_pct": 26.0,
+   "staff_pct": 16.9,
+   "margin_pct": 52.9
+  },
+  {
+   "id": "EV-0048",
+   "date": "2026-04-20",
+   "type": "Corporativo",
+   "client": "Constructora Bávaro Hills SRL",
+   "guests": 213,
+   "rev": 308850,
+   "food_pct": 27.5,
+   "staff_pct": 11.7,
+   "margin_pct": 56.0
+  },
+  {
+   "id": "EV-0049",
+   "date": "2026-04-25",
+   "type": "Boda",
+   "client": "Esther Núñez Polanco",
+   "guests": 165,
+   "rev": 379500,
+   "food_pct": 25.4,
+   "staff_pct": 11.0,
+   "margin_pct": 58.4
+  },
+  {
+   "id": "EV-0053",
+   "date": "2026-05-09",
+   "type": "Social",
+   "client": "Francisco Vásquez Polanco",
+   "guests": 55,
+   "rev": 82500,
+   "food_pct": 26.0,
+   "staff_pct": 14.5,
+   "margin_pct": 54.9
+  },
+  {
+   "id": "EV-0051",
+   "date": "2026-05-11",
+   "type": "Corporativo",
+   "client": "Distribuidora Automotriz Duarte SRL",
+   "guests": 229,
+   "rev": 354950,
+   "food_pct": 26.5,
+   "staff_pct": 10.9,
+   "margin_pct": 57.3
+  },
+  {
+   "id": "EV-0052",
+   "date": "2026-05-16",
+   "type": "Boda",
+   "client": "Manuel Vásquez Mejía",
+   "guests": 136,
+   "rev": 272000,
+   "food_pct": 26.5,
+   "staff_pct": 10.9,
+   "margin_pct": 56.9
+  },
+  {
+   "id": "EV-0057",
+   "date": "2026-06-03",
+   "type": "Corporativo",
+   "client": "Textiles Zona Este SRL",
+   "guests": 138,
+   "rev": 262200,
+   "food_pct": 27.5,
+   "staff_pct": 9.6,
+   "margin_pct": 58.7
+  },
+  {
+   "id": "EV-0059",
+   "date": "2026-06-06",
+   "type": "Boda",
+   "client": "José Ramírez Tavárez",
+   "guests": 134,
+   "rev": 321600,
+   "food_pct": 27.6,
+   "staff_pct": 10.0,
+   "margin_pct": 57.9
+  },
+  {
+   "id": "EV-0056",
+   "date": "2026-06-17",
+   "type": "Corporativo",
+   "client": "Telecomunicaciones del Caribe SA",
+   "guests": 212,
+   "rev": 360400,
+   "food_pct": 28.0,
+   "staff_pct": 9.4,
+   "margin_pct": 57.0
+  },
+  {
+   "id": "EV-0054",
+   "date": "2026-06-19",
+   "type": "Corporativo",
+   "client": "Distribuidora Automotriz Duarte SRL",
+   "guests": 166,
+   "rev": 282200,
+   "food_pct": 23.0,
+   "staff_pct": 10.0,
+   "margin_pct": 62.2
+  },
+  {
+   "id": "EV-0055",
+   "date": "2026-06-20",
+   "type": "Corporativo",
+   "client": "Banco Comercial del Ozama SA",
+   "guests": 91,
+   "rev": 154700,
+   "food_pct": 23.9,
+   "staff_pct": 10.3,
+   "margin_pct": 62.0
+  },
+  {
+   "id": "EV-0058",
+   "date": "2026-06-28",
+   "type": "Concierto",
+   "client": "Global Tours Dominicana SRL",
+   "guests": 540,
+   "rev": 783000,
+   "food_pct": 23.3,
+   "staff_pct": 10.7,
+   "margin_pct": 60.6
+  },
+  {
+   "id": "EV-0060",
+   "date": "2026-07-01",
+   "type": "Corporativo",
+   "client": "Seguros Bahía Azul SA",
+   "guests": 221,
+   "rev": 375700,
+   "food_pct": 24.5,
+   "staff_pct": 9.6,
+   "margin_pct": 61.0
+  },
+  {
+   "id": "EV-0061",
+   "date": "2026-07-08",
+   "type": "Corporativo",
+   "client": "Banco Comercial del Ozama SA",
+   "guests": 79,
+   "rev": 114550,
+   "food_pct": 25.5,
+   "staff_pct": 12.7,
+   "margin_pct": 57.1
+  },
+  {
+   "id": "EV-0062",
+   "date": "2026-07-09",
+   "type": "Corporativo",
+   "client": "Consultores Jurídicos Gazcue SRL",
+   "guests": 156,
+   "rev": 249600,
+   "food_pct": 24.6,
+   "staff_pct": 11.6,
+   "margin_pct": 58.4
+  },
+  {
+   "id": "EV-0067",
+   "date": "2026-07-11",
+   "type": "Social",
+   "client": "Manuel Vásquez García",
+   "guests": 78,
+   "rev": 109200,
+   "food_pct": 23.9,
+   "staff_pct": 12.9,
+   "margin_pct": 58.0
+  },
+  {
+   "id": "EV-0063",
+   "date": "2026-07-13",
+   "type": "Corporativo",
+   "client": "Banco Comercial del Ozama SA",
+   "guests": 197,
+   "rev": 325050,
+   "food_pct": 21.6,
+   "staff_pct": 10.1,
+   "margin_pct": 64.2
+  },
+  {
+   "id": "EV-0066",
+   "date": "2026-07-14",
+   "type": "Social",
+   "client": "Yolanda Rosario Reyes",
+   "guests": 74,
+   "rev": 122100,
+   "food_pct": 23.5,
+   "staff_pct": 11.1,
+   "margin_pct": 61.2
+  },
+  {
+   "id": "EV-0068",
+   "date": "2026-07-14",
+   "type": "Social",
+   "client": "Altagracia Rosario Pérez",
+   "guests": 93,
+   "rev": 148800,
+   "food_pct": 27.9,
+   "staff_pct": 11.1,
+   "margin_pct": 56.7
+  },
+  {
+   "id": "EV-0065",
+   "date": "2026-07-18",
+   "type": "Social",
+   "client": "Esther Batista Mejía",
+   "guests": 126,
+   "rev": 157500,
+   "food_pct": 27.5,
+   "staff_pct": 12.8,
+   "margin_pct": 54.2
+  },
+  {
+   "id": "EV-0064",
+   "date": "2026-07-24",
+   "type": "Boda",
+   "client": "Ángela Martínez Batista",
+   "guests": 201,
+   "rev": 482400,
+   "food_pct": 26.6,
+   "staff_pct": 9.6,
+   "margin_pct": 59.2
+  },
+  {
+   "id": "EV-0069",
+   "date": "2026-08-01",
+   "type": "Social",
+   "client": "Wilson Fernández Núñez",
+   "guests": 121,
+   "rev": 151250,
+   "food_pct": 23.8,
+   "staff_pct": 14.3,
+   "margin_pct": 57.8
+  },
+  {
+   "id": "EV-0070",
+   "date": "2026-08-01",
+   "type": "Social",
+   "client": "Esther Fernández Vásquez",
+   "guests": 72,
+   "rev": 97200,
+   "food_pct": 24.8,
+   "staff_pct": 14.7,
+   "margin_pct": 55.2
+  },
+  {
+   "id": "EV-0072",
+   "date": "2026-08-04",
+   "type": "Corporativo",
+   "client": "Telecomunicaciones del Caribe SA",
+   "guests": 228,
+   "rev": 330600,
+   "food_pct": 27.1,
+   "staff_pct": 10.9,
+   "margin_pct": 56.9
+  },
+  {
+   "id": "EV-0071",
+   "date": "2026-08-05",
+   "type": "Corporativo",
+   "client": "Farmacéutica Quisqueya SRL",
+   "guests": 266,
+   "rev": 505400,
+   "food_pct": 23.1,
+   "staff_pct": 8.3,
+   "margin_pct": 63.0
+  },
+  {
+   "id": "EV-0074",
+   "date": "2026-08-15",
+   "type": "Concierto",
+   "client": "Bachata Fest Producciones SRL",
+   "guests": 599,
+   "rev": 838600,
+   "food_pct": 21.3,
+   "staff_pct": 11.1,
+   "margin_pct": 63.5
+  },
+  {
+   "id": "EV-0076",
+   "date": "2026-08-15",
+   "type": "Social",
+   "client": "Rosa Mejía Núñez",
+   "guests": 99,
+   "rev": 138600,
+   "food_pct": 24.7,
+   "staff_pct": 14.0,
+   "margin_pct": 56.2
+  },
+  {
+   "id": "EV-0073",
+   "date": "2026-08-23",
+   "type": "Corporativo",
+   "client": "Textiles Zona Este SRL",
+   "guests": 152,
+   "rev": 212800,
+   "food_pct": 24.2,
+   "staff_pct": 11.3,
+   "margin_pct": 59.0
+  },
+  {
+   "id": "EV-0075",
+   "date": "2026-08-23",
+   "type": "Social",
+   "client": "Juan Díaz Germán",
+   "guests": 95,
+   "rev": 123500,
+   "food_pct": 26.3,
+   "staff_pct": 16.1,
+   "margin_pct": 52.9
+  },
+  {
+   "id": "EV-0077",
+   "date": "2026-09-06",
+   "type": "Corporativo",
+   "client": "Banco Comercial del Ozama SA",
+   "guests": 279,
+   "rev": 446400,
+   "food_pct": 24.1,
+   "staff_pct": 11.0,
+   "margin_pct": 60.9
+  },
+  {
+   "id": "EV-0078",
+   "date": "2026-09-07",
+   "type": "Corporativo",
+   "client": "Farmacéutica Quisqueya SRL",
+   "guests": 137,
+   "rev": 219200,
+   "food_pct": 25.5,
+   "staff_pct": 10.1,
+   "margin_pct": 58.5
+  },
+  {
+   "id": "EV-0081",
+   "date": "2026-09-07",
+   "type": "Boda",
+   "client": "Manuel Tavárez Fernández",
+   "guests": 191,
+   "rev": 506150,
+   "food_pct": 30.0,
+   "staff_pct": 7.9,
+   "margin_pct": 56.6
+  },
+  {
+   "id": "EV-0080",
+   "date": "2026-09-20",
+   "type": "Concierto",
+   "client": "Global Tours Dominicana SRL",
+   "guests": 604,
+   "rev": 815400,
+   "food_pct": 23.0,
+   "staff_pct": 11.6,
+   "margin_pct": 61.1
+  },
+  {
+   "id": "EV-0079",
+   "date": "2026-09-23",
+   "type": "Corporativo",
+   "client": "Industrias Plásticas del Cibao SRL",
+   "guests": 152,
+   "rev": 273600,
+   "food_pct": 23.7,
+   "staff_pct": 9.0,
+   "margin_pct": 62.5
+  },
+  {
+   "id": "EV-0084",
+   "date": "2026-10-04",
+   "type": "Corporativo",
+   "client": "Consultores Jurídicos Gazcue SRL",
+   "guests": 188,
+   "rev": 253800,
+   "food_pct": 30.7,
+   "staff_pct": 11.8,
+   "margin_pct": 52.9
+  }
+ ],
+ "aging": {
+  "0-30": 536704,
+  "31-60": 0,
+  "61-90": 0,
+  ">90": 0,
+  "Por vencer": 1279321
+ },
+ "credit": [
+  {
+   "client": "Bachata Fest Producciones SRL",
+   "type": "Promotora",
+   "debt": 536704,
+   "overdue": 536704,
+   "worst_late": 20,
+   "avg_late": 124,
+   "limit": 800000,
+   "suggested": 140000,
+   "status": "Suspender crédito"
+  },
+  {
+   "client": "Global Tours Dominicana SRL",
+   "type": "Promotora",
+   "debt": 521856,
+   "overdue": 0,
+   "worst_late": -30,
+   "avg_late": 6,
+   "limit": 1500000,
+   "suggested": 1000000,
+   "status": "Al día"
+  },
+  {
+   "client": "Consultores Jurídicos Gazcue SRL",
+   "type": "Empresa",
+   "debt": 324864,
+   "overdue": 0,
+   "worst_late": -27,
+   "avg_late": -1,
+   "limit": 200000,
+   "suggested": 260000,
+   "status": "Excede límite"
+  },
+  {
+   "client": "Farmacéutica Quisqueya SRL",
+   "type": "Empresa",
+   "debt": 257497,
+   "overdue": 0,
+   "worst_late": -22,
+   "avg_late": 4,
+   "limit": 450000,
+   "suggested": 540000,
+   "status": "Al día"
+  },
+  {
+   "client": "Industrias Plásticas del Cibao SRL",
+   "type": "Empresa",
+   "debt": 175104,
+   "overdue": 0,
+   "worst_late": -18,
+   "avg_late": 15,
+   "limit": 350000,
+   "suggested": 120000,
+   "status": "Al día"
+  },
+  {
+   "client": "Banco Comercial del Ozama SA",
+   "type": "Empresa",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": 1,
+   "limit": 900000,
+   "suggested": 520000,
+   "status": "Al día"
+  },
+  {
+   "client": "Constructora Bávaro Hills SRL",
+   "type": "Empresa",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": 21,
+   "limit": 500000,
+   "suggested": 140000,
+   "status": "Revisar"
+  },
+  {
+   "client": "Telecomunicaciones del Caribe SA",
+   "type": "Empresa",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": 5,
+   "limit": 800000,
+   "suggested": 350000,
+   "status": "Al día"
+  },
+  {
+   "client": "Seguros Bahía Azul SA",
+   "type": "Empresa",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": -1,
+   "limit": 600000,
+   "suggested": 190000,
+   "status": "Al día"
+  },
+  {
+   "client": "Grupo Hotelero Costa Ámbar SA",
+   "type": "Empresa",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": 10,
+   "limit": 700000,
+   "suggested": 0,
+   "status": "Al día"
+  },
+  {
+   "client": "Universidad Tecnológica del Este",
+   "type": "Empresa",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": 30,
+   "limit": 400000,
+   "suggested": 180000,
+   "status": "Revisar"
+  },
+  {
+   "client": "Textiles Zona Este SRL",
+   "type": "Empresa",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": 2,
+   "limit": 300000,
+   "suggested": 350000,
+   "status": "Al día"
+  },
+  {
+   "client": "Distribuidora Automotriz Duarte SRL",
+   "type": "Empresa",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": 10,
+   "limit": 450000,
+   "suggested": 270000,
+   "status": "Al día"
+  },
+  {
+   "client": "Agroexportadora Valle de Constanza SRL",
+   "type": "Empresa",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": null,
+   "limit": 250000,
+   "suggested": 0,
+   "status": "Al día"
+  },
+  {
+   "client": "Producciones Merengue Live SRL",
+   "type": "Promotora",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": 6,
+   "limit": 1200000,
+   "suggested": 0,
+   "status": "Al día"
+  },
+  {
+   "client": "Caribe Stage Events SRL",
+   "type": "Promotora",
+   "debt": 0,
+   "overdue": 0,
+   "worst_late": 0,
+   "avg_late": 5,
+   "limit": 1000000,
+   "suggested": 0,
+   "status": "Al día"
+  }
+ ],
+ "inventory": {
+  "by_cat": {
+   "Proteínas": 56974,
+   "Mariscos": 1160,
+   "Vegetales y frutas": 18279,
+   "Granos y víveres": 24803,
+   "Lácteos": 8900,
+   "Bebidas no alcohólicas": 37601,
+   "Bebidas alcohólicas": 30450,
+   "Desechables": 23110,
+   "Limpieza": 5960,
+   "Gas": 12924
+  },
+  "below": [
+   {
+    "code": "MAR-001",
+    "item": "Camarones",
+    "unit": "lb",
+    "stock": 1.1,
+    "min": 3.9,
+    "days_left": 1,
+    "supplier": "Mariscos Samaná SRL",
+    "reorder": 8.7
+   },
+   {
+    "code": "MAR-002",
+    "item": "Filete de dorado",
+    "unit": "lb",
+    "stock": 2.3,
+    "min": 7.2,
+    "days_left": 1,
+    "supplier": "Mariscos Samaná SRL",
+    "reorder": 15.7
+   }
+  ],
+  "waste": [
+   {
+    "cat": "Mariscos",
+    "pct": 9.7,
+    "value": 34771
+   },
+   {
+    "cat": "Vegetales y frutas",
+    "pct": 6.2,
+    "value": 40132
+   },
+   {
+    "cat": "Lácteos",
+    "pct": 3.5,
+    "value": 10558
+   },
+   {
+    "cat": "Proteínas",
+    "pct": 3.0,
+    "value": 56760
+   }
+  ]
+ },
+ "top_suppliers": [
+  {
+   "supplier": "Licores y Vinos Colonial SRL",
+   "total": 1287992
+  },
+  {
+   "supplier": "Inmobiliaria Los Mina SRL",
+   "total": 1203600
+  },
+  {
+   "supplier": "Avícola del Cibao SRL",
+   "total": 1179058
+  },
+  {
+   "supplier": "Bebidas del Caribe SA",
+   "total": 953805
+  },
+  {
+   "supplier": "Alquileres Eventos Premium SRL",
+   "total": 827497
+  },
+  {
+   "supplier": "Carnes Selectas Quisqueya SRL",
+   "total": 685974
+  },
+  {
+   "supplier": "Vegetales Frescos Constanza (productor)",
+   "total": 640961
+  },
+  {
+   "supplier": "Desechables Santo Domingo SRL",
+   "total": 574535
+  }
+ ],
+ "price_trend": {
+  "MAR-001": [
+   471.67,
+   473.03,
+   475.73,
+   477.08,
+   479.34,
+   481.59,
+   483.39,
+   484.74,
+   487.45,
+   489.25,
+   491.05,
+   492.86
+  ],
+  "PRO-002": [
+   162.81,
+   163.46,
+   164.77,
+   165.42,
+   166.5,
+   167.59,
+   168.46,
+   169.11,
+   170.42,
+   171.29,
+   172.16,
+   173.25
+  ],
+  "PRO-003": [
+   412.04,
+   413.7,
+   417.0,
+   418.65,
+   421.4,
+   424.15,
+   426.36,
+   428.01,
+   431.31,
+   433.51,
+   435.71,
+   438.46
+  ]
+ },
+ "ecf": {
+  "days_left": 39,
+  "purchases_ecf_pct": 41.4,
+  "purchases_ecf_docs": 184,
+  "purchases_docs": 655,
+  "sales_ecf_pct": 0.0,
+  "suppliers_ecf": 6,
+  "suppliers": 17,
+  "b01_used": 50,
+  "b02_used": 32,
+  "b11_used": 42
+ },
+ "pipeline": {
+  "promote": {
+   "accepted": 63,
+   "review": 5,
+   "rejected": 1,
+   "error": 0
+  },
+  "review": [
+   {
+    "ncf": "E310000004533",
+    "issuer_name": "Bebidas del Caribe SA",
+    "source": "ecf",
+    "reason": "buyer_is_us: buyer RNC 164500602 is not this company (135149996)"
+   },
+   {
+    "ncf": "B0100000246",
+    "issuer_name": null,
+    "source": "erp_ventas",
+    "reason": "totals_add_up: subtotal+ITBIS+other+tip differs from total by 44640.00"
+   },
+   {
+    "ncf": "B0100007687",
+    "issuer_name": "Desechables Santo Domingo SRL",
+    "source": "erp_compras",
+    "reason": "date_valid: 2026-11-07 is in the future"
+   },
+   {
+    "ncf": "E310000007026",
+    "issuer_name": "Bebidas del Caribe SA",
+    "source": "erp_compras",
+    "reason": "totals_add_up: subtotal+ITBIS+other+tip differs from total by 900.01"
+   },
+   {
+    "ncf": "B0100007953",
+    "issuer_name": "Servicios Técnicos de Cocina SRL",
+    "source": "erp_compras",
+    "reason": "required_fields: missing issuer_rnc"
+   }
+  ],
+  "rejected": [
+   {
+    "ncf": "B0100008917",
+    "issuer": "Carnes Selectas Quisqueya SRL",
+    "why": [
+     "485901002/B0100008917 already loaded"
+    ]
+   }
+  ],
+  "dgii": {
+   "606": {
+    "file": "DGII_F_606_135149996_202609.TXT",
+    "lines": 56,
+    "warnings": 168
+   },
+   "607": {
+    "file": "DGII_F_607_135149996_202609.TXT",
+    "lines": 6,
+    "warnings": 10
+   }
+  }
+ },
+ "process": {
+  "quote_to_contract": 8.1,
+  "event_to_invoice": 3.2,
+  "late_invoices": 10,
+  "invoice_to_cash": 43.4,
+  "avg_days_late": 9.1,
+  "deposit_by_type": {
+   "Corporativo": 38,
+   "Concierto": 88,
+   "Boda": 100,
+   "Social": 91
+  },
+  "events_done": 82
+ },
+ "agenda": [
+  {
+   "month": "2026-10",
+   "contratado": 1894150,
+   "cotizado": 429300
+  },
+  {
+   "month": "2026-11",
+   "contratado": 1464750,
+   "cotizado": 969350
+  },
+  {
+   "month": "2026-12",
+   "contratado": 907250,
+   "cotizado": 2785400
+  }
+ ]
+}

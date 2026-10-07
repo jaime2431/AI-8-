@@ -3,24 +3,24 @@
   "extracted": {
     "ecf": 5,
     "erp_ventas": 7,
-    "erp_compras": 59
+    "erp_compras": 57
   },
   "promote": {
-    "accepted": 65,
+    "accepted": 63,
     "review": 5,
     "rejected": 1,
     "error": 0
   },
   "clean_totals_dop": {
     "sale": 2546777.57,
-    "purchase": 1245463.01
+    "purchase": 1233312.92
   },
   "review_queue": [
     {
       "ncf": "E310000004533",
       "issuer_name": "Bebidas del Caribe SA",
       "source": "ecf",
-      "reason": "buyer_is_us: buyer RNC 102932689 is not this company (135149996)"
+      "reason": "buyer_is_us: buyer RNC 164500602 is not this company (135149996)"
     },
     {
       "ncf": "B0100000246",
@@ -41,7 +41,7 @@
       "reason": "totals_add_up: subtotal+ITBIS+other+tip differs from total by 900.01"
     },
     {
-      "ncf": "B0100006375",
+      "ncf": "B0100007953",
       "issuer_name": "Servicios Técnicos de Cocina SRL",
       "source": "erp_compras",
       "reason": "required_fields: missing issuer_rnc"
@@ -59,8 +59,8 @@
   "dgii": {
     "606": {
       "file": "DGII_F_606_135149996_202609.TXT",
-      "lines": 58,
-      "warnings": 174,
+      "lines": 56,
+      "warnings": 168,
       "sample_warnings": [
         "E310000004521: monto en servicios / monto en bienes split unknown; fields 8 and 9 left empty",
         "E310000004521: tipo de bienes y servicios comprados (required) not in our data; left empty",

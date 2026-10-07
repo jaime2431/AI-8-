@@ -112,7 +112,7 @@ CLIENT_SPECS = [
     ("Consultores Jurídicos Gazcue SRL", "Empresa", "Servicios", 200_000, 30, (-5, 3)),
     ("Producciones Merengue Live SRL", "Promotora", "Entretenimiento", 1_200_000, 30, (5, 20)),
     ("Caribe Stage Events SRL", "Promotora", "Entretenimiento", 1_000_000, 30, (0, 12)),
-    ("Bachata Fest Producciones SRL", "Promotora", "Entretenimiento", 800_000, 30, (45, 95)),
+    ("Bachata Fest Producciones SRL", "Promotora", "Entretenimiento", 800_000, 30, (70, 150)),
     ("Global Tours Dominicana SRL", "Promotora", "Entretenimiento", 1_500_000, 45, (0, 10)),   # bills in USD
 ]
 CLIENTS = [{"rnc": new_rnc(rng.choice("14")), "name": n, "type": t, "sector": s, "limit": lim, "days": dd, "late": late}
@@ -335,7 +335,7 @@ def simulate(price_k: float, volume: float) -> dict:
             for code, i in ITEM.items():
                 par = usage_week[code] * (1.4 if i["cat"] in PERISHABLE else 2.2)
                 if stock[code] < par:
-                    if d > TODAY - timedelta(days=7) and i["supplier"] in late_supplier:
+                    if d > TODAY - timedelta(days=12) and i["supplier"] in late_supplier:
                         continue
                     qty = round(par - stock[code] + usage_week[code] * 0.2, 1)
                     orders[i["supplier"]].append((code, qty, unit_cost(code, d)))

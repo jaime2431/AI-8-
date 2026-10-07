@@ -1,0 +1,515 @@
+<title>Tablero Sabor &amp; Escena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Power BI–style report — header with the Datia mark and company, a page strip (one page per owner decision), cards of chart + "qué muestra / qué hacer" */
+:root {
+  --bg: #f4f7f7; --surface: #ffffff; --ink: #142a30; --muted: #56707a; --line: #d6e1e3; --grid: #e6eeef;
+  --accent: #1f7f97; --accent-2: #8cc9d8; --accent-soft: #dceef2; --spark: #9fe0ee;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;          /* event types, validated order */
+  --good: #227a4f; --good-soft: #e0f1e7; --warn: #a8650a; --warn-soft: #fbefd9; --bad: #b23a33; --bad-soft: #f8e1df;
+  --bar-muted: #b9cdd2;
+  --font-display: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1a1d; --surface: #16252a; --ink: #e3eef0; --muted: #93abb2; --line: #2a3e44; --grid: #22343a;
+  --accent: #5cc0d8; --accent-2: #2f6f80; --accent-soft: #1b3a43; --spark: #9fe0ee;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --good: #63c58f; --good-soft: #17352a; --warn: #e3aa4f; --warn-soft: #3a2c14; --bad: #ee7d74; --bad-soft: #3d1f1d;
+  --bar-muted: #3d565d; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1a1d; --surface: #16252a; --ink: #e3eef0; --muted: #93abb2; --line: #2a3e44; --grid: #22343a;
+  --accent: #5cc0d8; --accent-2: #2f6f80; --accent-soft: #1b3a43; --spark: #9fe0ee;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --good: #63c58f; --good-soft: #17352a; --warn: #e3aa4f; --warn-soft: #3a2c14; --bad: #ee7d74; --bad-soft: #3d1f1d;
+  --bar-muted: #3d565d; color-scheme: dark }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 1.05rem; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); font-size: .85em; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-inner { max-width: 1200px; margin: 0 auto; padding: 12px 16px 0; display: grid; gap: 8px; }
+.brand { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.brand svg { width: 34px; height: 34px; flex: none; }
+.brand h1 { font-size: 1.15rem; }
+.brand .sub { font-size: .82rem; }
+.brand .asof { margin-left: auto; font-size: .82rem; text-align: right; }
+.pages { display: flex; gap: 2px; overflow-x: auto; }
+.page { border: 0; background: none; padding: 9px 12px; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 600; color: var(--muted); white-space: nowrap; font-size: .92rem; }
+.page[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 56px; display: grid; gap: 16px; }
+.banner { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; font-size: .88rem; }
+.view { display: grid; gap: 16px; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+.c12 { grid-column: span 12; } .c8 { grid-column: span 8; } .c7 { grid-column: span 7; } .c6 { grid-column: span 6; } .c5 { grid-column: span 5; } .c4 { grid-column: span 4; }
+@media (max-width: 900px) { .c8, .c7, .c6, .c5, .c4 { grid-column: span 12; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.why { font-size: .86rem; color: var(--muted); display: grid; gap: 4px; border-top: 1px dashed var(--line); padding-top: 10px; max-width: 80ch; }
+.why b { color: var(--ink); font-weight: 600; }
+
+.kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 2px; }
+.kpi .label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.kpi strong { font-family: var(--font-display); font-size: 1.55rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.kpi .note { font-size: .8rem; }
+.kpi .note.good { color: var(--good); } .kpi .note.warn { color: var(--warn); } .kpi .note.bad { color: var(--bad); }
+
+svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+svg.chart text { font-family: var(--font-body); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .8rem; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.legend i.line { height: 3px; width: 16px; border-radius: 2px; vertical-align: 3px; }
+details.data summary { cursor: pointer; font-size: .8rem; color: var(--accent); width: fit-content; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+th { text-align: left; font-weight: 600; color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 2px 9px; font-size: .78rem; font-weight: 600; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.good { background: var(--good-soft); color: var(--good); } .pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); } .pill.info { background: var(--accent-soft); color: var(--accent); }
+.meter { display: grid; gap: 6px; }
+.meter .row { display: flex; justify-content: space-between; gap: 8px; font-size: .88rem; }
+.meter .track { height: 10px; border-radius: 99px; background: var(--grid); overflow: hidden; }
+.meter .fill { height: 100%; border-radius: 99px; background: var(--accent); }
+.big { font-family: var(--font-display); font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 700px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+.step { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 2px; position: relative; }
+.step strong { font-family: var(--font-display); font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.step span { font-size: .82rem; color: var(--muted); }
+.list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: .88rem; }
+#tip { position: fixed; z-index: 20; pointer-events: none; background: var(--ink); color: var(--surface); padding: 6px 10px; border-radius: 6px; font-size: .8rem; line-height: 1.35; max-width: 260px; white-space: pre-line; transform: translate(-50%, calc(-100% - 12px)); }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="var(--accent)"/><circle cx="27" cy="38" r="11" fill="none" stroke="var(--surface)" stroke-width="7"/><rect x="38" y="12" width="7" height="38" rx="3.5" fill="var(--surface)"/><circle cx="19" cy="17" r="4.5" fill="var(--spark)"/></svg>
+      <div><h1 id="company">Sabor &amp; Escena Catering</h1><div class="sub muted">Tablero de gestión · preparado por Datia</div></div>
+      <div class="asof muted" id="asof"></div>
+    </div>
+    <nav class="pages" role="tablist" aria-label="Páginas del tablero">
+      <button class="page" role="tab" data-v="resumen" id="p-resumen">Resumen</button>
+      <button class="page" role="tab" data-v="eventos" id="p-eventos">Supervisión de eventos</button>
+      <button class="page" role="tab" data-v="credito" id="p-credito">Crédito y cobros</button>
+      <button class="page" role="tab" data-v="inventario" id="p-inventario">Inventario</button>
+      <button class="page" role="tab" data-v="compras" id="p-compras">Compras</button>
+      <button class="page" role="tab" data-v="ecf" id="p-ecf">e-CF y DGII</button>
+      <button class="page" role="tab" data-v="procesos" id="p-procesos">Procedimientos</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="banner">Datos de ejemplo de una empresa ficticia, generados para el piloto con números realistas. La tasa del dólar del 7 de octubre de 2026 es la real del Banco Central. En el piloto real, cada cifra sale del Power BI del cliente.</div>
+
+  <section class="view" id="v-resumen">
+    <div class="kpis" id="kpis"></div>
+    <div class="grid">
+      <div class="card c8"><div class="card-head"><h2>Beneficio por quincena</h2><span class="muted num" style="font-size:.8rem;">US$, antes de ISR</span></div>
+        <div id="ch-quincena"></div><div class="why" id="why-quincena"></div></div>
+      <div class="card c4"><div class="card-head"><h2>Agenda de los próximos 3 meses</h2></div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>Contratado</span><span><i style="background:var(--accent-2)"></i>Cotizado</span></div>
+        <div id="ch-agenda"></div><div class="why" id="why-agenda"></div></div>
+      <div class="card c12"><div class="card-head"><h2>Ventas por mes y tipo de evento</h2><span class="muted" style="font-size:.8rem;">RD$, sin ITBIS ni propina</span></div>
+        <div class="legend" id="lg-types"></div><div id="ch-sales"></div>
+        <details class="data"><summary>Ver los datos en tabla</summary><div class="table-wrap" id="tb-sales"></div></details>
+        <div class="why" id="why-sales"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-eventos" hidden>
+    <div class="grid">
+      <div class="card c8"><div class="card-head"><h2>Costo de alimentos por evento</h2><span class="muted" style="font-size:.8rem;">% del precio cobrado</span></div>
+        <div class="legend" id="lg-types2"></div><div id="ch-food"></div><div class="why" id="why-food"></div></div>
+      <div class="card c4"><div class="card-head"><h2>Margen de contribución por tipo</h2></div>
+        <div id="ch-typemargin"></div><div class="why" id="why-typemargin"></div></div>
+      <div class="card c12"><div class="card-head"><h2>Eventos que necesitan su atención</h2><span class="muted" style="font-size:.8rem;">costo de alimentos sobre 30% o margen bajo 50%</span></div>
+        <div class="table-wrap" id="tb-alerts"></div><div class="why" id="why-alerts"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-credito" hidden>
+    <div class="grid">
+      <div class="card c5"><div class="card-head"><h2>Cuentas por cobrar por antigüedad</h2><span class="muted" style="font-size:.8rem;">RD$, al 7 de octubre</span></div>
+        <div id="ch-aging"></div><div class="why" id="why-aging"></div></div>
+      <div class="card c7"><div class="card-head"><h2>Crédito por cliente</h2><span class="muted" style="font-size:.8rem;">según su historial de pago con ustedes</span></div>
+        <div class="table-wrap" id="tb-credit"></div><div class="why" id="why-credit"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-inventario" hidden>
+    <div class="grid">
+      <div class="card c12"><div class="card-head"><h2>Productos bajo el mínimo</h2></div><div class="table-wrap" id="tb-below"></div><div class="why" id="why-below"></div></div>
+      <div class="card c6"><div class="card-head"><h2>Merma por categoría</h2><span class="muted" style="font-size:.8rem;">% de lo que entró a cocina, 12 meses</span></div>
+        <div id="ch-waste"></div><div class="why" id="why-waste"></div></div>
+      <div class="card c6"><div class="card-head"><h2>Valor del inventario hoy</h2><span class="muted" style="font-size:.8rem;">RD$ al costo</span></div>
+        <div id="ch-stock"></div><div class="why" id="why-stock"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-compras" hidden>
+    <div class="grid">
+      <div class="card c6"><div class="card-head"><h2>Principales suplidores</h2><span class="muted" style="font-size:.8rem;">RD$ con impuestos, 12 meses</span></div>
+        <div id="ch-suppliers"></div><div class="why" id="why-suppliers"></div></div>
+      <div class="card c6"><div class="card-head"><h2>Precio de compra por libra</h2><span class="muted" style="font-size:.8rem;">RD$/lb</span></div>
+        <div class="legend" id="lg-price"></div><div id="ch-price"></div><div class="why" id="why-price"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-ecf" hidden>
+    <div class="grid">
+      <div class="card c4"><div class="card-head"><h2>Fecha límite e-CF</h2></div>
+        <div><div class="big" id="ecf-days"></div><p class="muted">días para el 15 de noviembre de 2026</p></div>
+        <div class="why" id="why-deadline"></div></div>
+      <div class="card c8"><div class="card-head"><h2>¿Qué tan listos están?</h2></div><div id="ecf-meters" style="display:grid;gap:14px;"></div><div class="why" id="why-ecf"></div></div>
+      <div class="card c12"><div class="card-head"><h2>Revisión automática de septiembre</h2><span class="muted" style="font-size:.8rem;">las reglas que corren cada noche, aplicadas a la exportación del ERP</span></div>
+        <div id="ecf-run"></div><div class="why" id="why-run"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-procesos" hidden>
+    <div class="grid">
+      <div class="card c12"><div class="card-head"><h2>Del presupuesto al cobro</h2><span class="muted" style="font-size:.8rem;">días promedio, eventos de los últimos 12 meses</span></div>
+        <div class="steps" id="steps"></div><div class="why" id="why-steps"></div></div>
+      <div class="card c6"><div class="card-head"><h2>Eventos con anticipo del 50%</h2><span class="muted" style="font-size:.8rem;">la política dice: todos</span></div>
+        <div id="ch-deposit"></div><div class="why" id="why-deposit"></div></div>
+      <div class="card c6"><div class="card-head"><h2>Rutina sugerida para el dueño</h2></div>
+        <ol class="list" id="routine"></ol></div>
+    </div>
+  </section>
+</main>
+<div id="tip" hidden></div>
+
+<script>
+const D = __DATA__;
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const rd = (v) => "RD$" + Math.round(v).toLocaleString("es-DO");
+  const rdK = (v) => Math.abs(v) >= 1e6 ? "RD$" + (v / 1e6).toLocaleString("es-DO", { maximumFractionDigits: 2 }) + " M" : "RD$" + Math.round(v / 1000).toLocaleString("es-DO") + " mil";
+  const usd = (v) => (v < 0 ? "−" : "") + "US$" + Math.abs(Math.round(v)).toLocaleString("es-DO");
+  const pct = (v) => v.toLocaleString("es-DO", { maximumFractionDigits: 1 }) + "%";
+  const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const mlabel = (k) => MES[+k.slice(5, 7) - 1] + " " + k.slice(2, 4);
+  const TYPES = ["Corporativo", "Concierto", "Boda", "Social"];
+  const TCOL = { Corporativo: "var(--s1)", Concierto: "var(--s2)", Boda: "var(--s3)", Social: "var(--s4)" };
+  const why = (id, shows, todo) => { $(id).innerHTML = `<p><b>Qué muestra:</b> ${shows}</p><p><b>Qué hacer:</b> ${todo}</p>`; };
+
+  $("company").textContent = D.company.name.replace(" (ficticia)", "");
+  $("asof").innerHTML = `Datos al ${new Date(D.today + "T12:00").toLocaleDateString("es-DO", { day: "numeric", month: "long", year: "numeric" })}<br>Dólar BCRD: compra ${D.rate[0]} · venta ${D.rate[1]}`;
+
+  // pages
+  const views = ["resumen", "eventos", "credito", "inventario", "compras", "ecf", "procesos"];
+  const show = (v) => { views.forEach((x) => { $("v-" + x).hidden = x !== v; $("p-" + x).setAttribute("aria-selected", String(x === v)); }); try { localStorage.setItem("se-page", v); } catch {} };
+  document.querySelectorAll(".page").forEach((b) => b.addEventListener("click", () => show(b.dataset.v)));
+  let saved = null; try { saved = localStorage.getItem("se-page"); } catch {}
+  const h = location.hash.slice(1); show(views.includes(h) ? h : views.includes(saved) ? saved : "resumen");
+
+  // tooltip
+  const tip = $("tip");
+  document.addEventListener("pointermove", (e) => {
+    const t = e.target.closest?.("[data-tip]");
+    if (!t) { tip.hidden = true; return; }
+    tip.textContent = t.dataset.tip; tip.hidden = false;
+    tip.style.left = Math.min(window.innerWidth - 140, Math.max(140, e.clientX)) + "px"; tip.style.top = e.clientY + "px";
+  });
+
+  // ---------- small SVG helpers ----------
+  const nice = (v) => { const p = Math.pow(10, Math.floor(Math.log10(Math.abs(v) || 1))); const n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; };
+  const ticks = (lo, hi, n = 4) => { const step = nice((hi - lo) / n); const out = []; for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6)); return { step, out }; };
+  const bar = (x, y, w, h, fill, tipText, roundTop = true) => {
+    // 4px rounded data end, square at the baseline
+    const r = Math.min(4, w / 2, Math.abs(h));
+    if (h <= 0) return "";
+    const p = roundTop ? `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`
+                       : `M${x},${y}V${y + h - r}Q${x},${y + h} ${x + r},${y + h}H${x + w - r}Q${x + w},${y + h} ${x + w},${y + h - r}V${y}Z`;
+    return `<path d="${p}" fill="${fill}"${tipText ? ` data-tip="${esc(tipText)}"` : ""}/>`;
+  };
+  const hbar = (x, y, w, h, fill, tipText) => {
+    const r = Math.min(4, h / 2, w);
+    if (w <= 0) return "";
+    return `<path d="M${x},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h - r}Q${x + w},${y + h} ${x + w - r},${y + h}H${x}Z" fill="${fill}"${tipText ? ` data-tip="${esc(tipText)}"` : ""}/>`;
+  };
+  const svg = (w, h, body, label) => `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">${body}</svg>`;
+  const T = (x, y, s, o = {}) => `<text x="${x}" y="${y}" font-size="${o.size || 11}" fill="${o.fill || "var(--muted)"}" text-anchor="${o.anchor || "start"}"${o.weight ? ` font-weight="${o.weight}"` : ""}>${esc(s)}</text>`;
+
+  function hbars(rows, { fmt, color = () => "var(--accent)", max, threshold, thresholdLabel, labelW = 170 }) {
+    const W = 560, rowH = 30, H = rows.length * rowH + 24, L = labelW, R = 70;
+    const mx = max || Math.max(...rows.map((r) => r.v)) * 1.05;
+    const x = (v) => L + v / mx * (W - L - R);
+    let g = "";
+    rows.forEach((r, i) => {
+      const y = i * rowH + 4;
+      g += T(L - 10, y + 15, r.label, { anchor: "end", fill: "var(--ink)", size: 12 });
+      g += hbar(L, y + 3, Math.max(2, x(r.v) - L), rowH - 12, color(r), r.tip || `${r.label}: ${fmt(r.v)}`);
+      g += T(x(r.v) + 6, y + 15, fmt(r.v), { fill: "var(--ink)", size: 11.5 });
+    });
+    if (threshold != null) g += `<line x1="${x(threshold)}" x2="${x(threshold)}" y1="0" y2="${H - 18}" stroke="var(--ink)" stroke-dasharray="3 3" stroke-width="1"/>` + T(x(threshold), H - 4, thresholdLabel, { anchor: "middle" });
+    return svg(W, H, g, rows.map((r) => r.label + " " + fmt(r.v)).join(", "));
+  }
+
+  // ---------- RESUMEN ----------
+  const k = D.kpi;
+  const goalHit = 24 - k.below_goal;
+  $("kpis").innerHTML = [
+    ["Ventas 12 meses", rdK(k.revenue_12m), `${k.events} eventos realizados`, ""],
+    ["Margen neto", pct(k.margin * 100), "meta del dueño: 30%", k.margin >= 0.3 ? "good" : "warn"],
+    ["Beneficio por quincena", usd(k.avg_profit_usd), `promedio · ${goalHit} de 24 sobre la meta`, k.avg_profit_usd >= 5000 ? "good" : "warn"],
+    ["Por cobrar vencido", rdK(k.ar_overdue), `de ${rdK(k.ar_total)} por cobrar`, k.ar_overdue > 0 ? "bad" : "good"],
+    ["Inventario", rdK(k.inventory_value), `${k.below_min} productos bajo el mínimo`, k.below_min ? "warn" : "good"],
+  ].map(([l, v, n, c]) => `<div class="kpi"><span class="label">${l}</span><strong>${v}</strong><span class="note ${c}">${n}</span></div>`).join("");
+
+  (function quincena() {
+    const Q = D.quincenas, W = 720, H = 250, L = 52, R = 10, Tp = 14, B = 30;
+    const lo = Math.min(0, ...Q.map((q) => q.profit_usd)), hi = Math.max(5000, ...Q.map((q) => q.profit_usd));
+    const tk = ticks(lo, hi, 5);
+    const y0 = tk.out[0] > lo ? tk.out[0] - tk.step : Math.min(tk.out[0], lo), y1 = tk.out[tk.out.length - 1];
+    const y = (v) => Tp + (y1 - v) / (y1 - y0) * (H - Tp - B);
+    const bw = (W - L - R) / Q.length;
+    let g = "";
+    tk.out.forEach((v) => { g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "var(--muted)" : "var(--grid)"}"/>` + T(L - 8, y(v) + 4, (v / 1000) + "k", { anchor: "end" }); });
+    Q.forEach((q, i) => {
+      const x = L + i * bw + 2, w = bw - 4, v = q.profit_usd;
+      const fill = v < 0 ? "var(--bad)" : v >= 5000 ? "var(--accent)" : "var(--bar-muted)";
+      const t = `${q.label} ${q.year}: ${usd(v)}\nVentas ${rdK(q.rev)}`;
+      g += v >= 0 ? bar(x, y(v), w, y(0) - y(v), fill, t) : bar(x, y(0), w, y(v) - y(0), fill, t, false);
+      g += `<rect x="${L + i * bw}" y="${Tp}" width="${bw}" height="${H - Tp - B}" fill="transparent" data-tip="${esc(t)}"/>`;
+      if (q.label.endsWith("1")) g += T(x + bw / 2, H - 10, q.label.slice(0, 3) + (q.label.startsWith("ene") ? " " + String(q.year).slice(2) : ""), { anchor: "start" });
+    });
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(5000)}" y2="${y(5000)}" stroke="var(--ink)" stroke-dasharray="5 4" stroke-width="1.5"/>` + T(W - R, y(5000) - 6, "Meta US$5,000", { anchor: "end", fill: "var(--ink)", weight: 600 });
+    $("ch-quincena").innerHTML = svg(W, H, g, "Beneficio por quincena en dólares, 24 quincenas");
+    const best = Q.reduce((a, b) => b.profit_usd > a.profit_usd ? b : a), worst = Q.reduce((a, b) => b.profit_usd < a.profit_usd ? b : a);
+    why("why-quincena", `Lo que queda de cada quincena después de comida, personal, alquiler, luz y nómina fija. Las barras azules llegaron a la meta; las grises no. ${goalHit} de 24 quincenas llegaron. La mejor fue ${best.label} ${best.year} (${usd(best.profit_usd)}) y la peor ${worst.label} ${worst.year} (${usd(worst.profit_usd)}).`,
+      `El promedio cumple la meta, pero solo gracias a diciembre y el verano. Llene enero, abril y septiembre con eventos corporativos pequeños o paquetes sociales, y guarde parte de lo que entra en diciembre para cubrir la nómina fija de esos meses.`);
+  })();
+
+  (function agenda() {
+    const A = D.agenda, W = 360, rowH = 46, H = A.length * rowH + 10, L = 58, R = 12;
+    const mx = Math.max(...A.map((a) => a.contratado + a.cotizado)) * 1.08;
+    const x = (v) => v / mx * (W - L - R);
+    let g = "";
+    A.forEach((a, i) => {
+      const y = i * rowH + 8;
+      g += T(L - 10, y + 16, mlabel(a.month), { anchor: "end", fill: "var(--ink)", size: 12 });
+      g += hbar(L, y + 4, x(a.contratado), 18, "var(--accent)", `${mlabel(a.month)} contratado: ${rd(a.contratado)}`);
+      g += hbar(L + x(a.contratado) + 2, y + 4, x(a.cotizado), 18, "var(--accent-2)", `${mlabel(a.month)} cotizado: ${rd(a.cotizado)}`);
+      g += T(L, y + 38, `${rdK(a.contratado)} firmado · ${rdK(a.cotizado)} por cerrar`, { size: 10.5 });
+    });
+    $("ch-agenda").innerHTML = svg(W, H, g, "Ventas contratadas y cotizadas para los próximos tres meses");
+    const dec = A[2];
+    why("why-agenda", `Eventos ya firmados y presupuestos enviados que aún no se han cerrado, por mes.`,
+      `Diciembre tiene ${rdK(dec.cotizado)} en presupuestos sin cerrar contra ${rdK(dec.contratado)} firmados. Llame esta semana a esos clientes: las fiestas de fin de año se deciden en octubre.`);
+  })();
+
+  (function sales() {
+    const M = D.months, S = D.sales_by_type, W = 960, H = 260, L = 64, R = 10, Tp = 10, B = 26;
+    const tot = M.map((_, i) => TYPES.reduce((a, t) => a + S[t][i], 0));
+    const tk = ticks(0, Math.max(...tot), 4); const top = tk.out[tk.out.length - 1] < Math.max(...tot) ? tk.out[tk.out.length - 1] + tk.step : tk.out[tk.out.length - 1];
+    const y = (v) => Tp + (top - v) / top * (H - Tp - B);
+    const bw = (W - L - R) / M.length;
+    let g = "";
+    ticks(0, top, 4).out.forEach((v) => { g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/>` + T(L - 8, y(v) + 4, v ? (v / 1e6).toLocaleString("es-DO") + " M" : "0", { anchor: "end" }); });
+    M.forEach((m, i) => {
+      let acc = 0; const x = L + i * bw + bw * 0.18, w = bw * 0.64;
+      const present = TYPES.filter((t) => S[t][i] > 0);
+      present.forEach((t, j) => {
+        const v = S[t][i], yTop = y(acc + v), hgt = y(acc) - yTop - (j ? 2 : 0);
+        g += j === present.length - 1 ? bar(x, yTop, w, hgt, TCOL[t], `${mlabel(m)} · ${t}: ${rd(v)}`) : `<rect x="${x}" y="${yTop}" width="${w}" height="${Math.max(0, hgt)}" fill="${TCOL[t]}" data-tip="${esc(`${mlabel(m)} · ${t}: ${rd(v)}`)}"/>`;
+        acc += v;
+      });
+      g += T(x + w / 2, H - 8, mlabel(m), { anchor: "middle" });
+      if (tot[i] === Math.max(...tot)) g += T(x + w / 2, y(tot[i]) - 6, rdK(tot[i]), { anchor: "middle", fill: "var(--ink)", weight: 600 });
+    });
+    $("ch-sales").innerHTML = svg(W, H, g, "Ventas mensuales por tipo de evento");
+    const lg = TYPES.map((t) => `<span><i style="background:${TCOL[t]}"></i>${t}</span>`).join("");
+    $("lg-types").innerHTML = lg; $("lg-types2").innerHTML = lg;
+    $("tb-sales").innerHTML = `<table><thead><tr><th>Mes</th>${TYPES.map((t) => `<th class="r">${t}</th>`).join("")}<th class="r">Total</th></tr></thead><tbody>${M.map((m, i) => `<tr><td>${mlabel(m)}</td>${TYPES.map((t) => `<td class="r">${rd(S[t][i])}</td>`).join("")}<td class="r">${rd(tot[i])}</td></tr>`).join("")}</tbody></table>`;
+    const tm = D.type_margin, corpShare = tm.Corporativo.rev / TYPES.reduce((a, t) => a + tm[t].rev, 0) * 100;
+    why("why-sales", `Cuánto vendieron cada mes y de qué tipo de evento vino. Los eventos corporativos son ${pct(corpShare)} de las ventas del año; los conciertos son pocos pero grandes.`,
+      `Depender tanto de empresas hace que diciembre sea excelente y enero muy flojo. Ofrezca a sus clientes corporativos un contrato anual (almuerzos de equipo, reuniones trimestrales) para tener ventas fijas todo el año.`);
+  })();
+
+  // ---------- EVENTOS ----------
+  (function food() {
+    const E = D.events, W = 720, H = 260, L = 44, R = 12, Tp = 12, B = 26;
+    const t0 = new Date("2025-10-01").getTime(), t1 = new Date("2026-10-08").getTime();
+    const x = (s) => L + (new Date(s).getTime() - t0) / (t1 - t0) * (W - L - R);
+    const hi = Math.ceil(Math.max(...E.map((e) => e.food_pct)) / 5) * 5, lo = 15;
+    const y = (v) => Tp + (hi - v) / (hi - lo) * (H - Tp - B);
+    let g = "";
+    for (let v = lo; v <= hi; v += 5) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/>` + T(L - 8, y(v) + 4, v + "%", { anchor: "end" });
+    D.months.forEach((m) => { g += T(x(m + "-01"), H - 8, mlabel(m), { anchor: "start", size: 10.5 }); });
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(30)}" y2="${y(30)}" stroke="var(--ink)" stroke-dasharray="5 4" stroke-width="1.5"/>` + T(W - R, y(30) - 6, "Tope: 30%", { anchor: "end", fill: "var(--ink)", weight: 600 });
+    E.forEach((e) => { g += `<circle cx="${x(e.date)}" cy="${y(e.food_pct)}" r="5" fill="${TCOL[e.type]}" stroke="var(--surface)" stroke-width="2" data-tip="${esc(`${e.id} · ${e.type}\n${e.client}\n${e.guests} invitados · ${rd(e.rev)}\nAlimentos ${pct(e.food_pct)} · margen ${pct(e.margin_pct)}`)}"/>`; });
+    $("ch-food").innerHTML = svg(W, H, g, "Costo de alimentos como porcentaje del precio, por evento");
+    const over = E.filter((e) => e.food_pct > 30);
+    const fs = E.map((e) => e.food_pct).sort((a, b) => a - b), p10 = fs[Math.floor(fs.length * 0.1)], p90 = fs[Math.floor(fs.length * 0.9)];
+    why("why-food", `Cada punto es un evento. Muestra qué parte de lo cobrado se fue en comida y bebida. Ocho de cada diez eventos quedan entre ${pct(p10)} y ${pct(p90)}. ${over.length} eventos pasaron el tope de 30%.`,
+      `Pase el cursor por los puntos sobre la línea. Pregunte al chef qué pasó en cada uno (cambio de menú, invitados de más, merma) y ajuste el precio de esos menús o el control de porciones.`);
+  })();
+
+  (function typemargin() {
+    const tm = D.type_margin;
+    $("ch-typemargin").innerHTML = hbars(TYPES.map((t) => ({ label: t, v: tm[t].margin_pct, tip: `${t}: margen ${pct(tm[t].margin_pct)}\n${tm[t].events} eventos · ticket ${rd(tm[t].ticket)} por invitado` })),
+      { fmt: pct, max: 100, color: (r) => TCOL[r.label], labelW: 100 });
+    const best = TYPES.reduce((a, t) => tm[t].margin_pct > tm[a].margin_pct ? t : a), worst = TYPES.reduce((a, t) => tm[t].margin_pct < tm[a].margin_pct ? t : a);
+    why("why-typemargin", `Lo que deja cada tipo de evento después de comida, personal del evento, transporte y mobiliario, antes de la nómina fija y el alquiler.`,
+      (() => { const small = D.events.filter((e) => e.type === worst && e.guests < 80); const avgSmall = small.length ? small.reduce((a, e) => a + e.margin_pct, 0) / small.length : null;
+        return `${best} deja más (${pct(tm[best].margin_pct)}); ${worst} menos (${pct(tm[worst].margin_pct)}).` + (avgSmall != null ? ` Los eventos de tipo ${worst.toLowerCase()} con menos de 80 invitados dejan solo ${pct(avgSmall)} en promedio: ponga un mínimo de invitados o un cargo fijo por evento.` : ""); })());
+  })();
+
+  (function alerts() {
+    const A = D.events.filter((e) => e.food_pct > 30 || e.margin_pct < 50).sort((a, b) => b.date.localeCompare(a.date));
+    $("tb-alerts").innerHTML = `<table><thead><tr><th>Evento</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th class="r">Invitados</th><th class="r">Venta</th><th class="r">Alimentos</th><th class="r">Personal</th><th class="r">Margen</th></tr></thead><tbody>${A.map((e) => `<tr><td class="mono">${e.id}</td><td>${e.date}</td><td>${e.type}</td><td>${esc(e.client)}</td><td class="r">${e.guests}</td><td class="r">${rd(e.rev)}</td><td class="r"><span class="pill ${e.food_pct > 30 ? "bad" : "good"}">${pct(e.food_pct)}</span></td><td class="r">${pct(e.staff_pct)}</td><td class="r"><span class="pill ${e.margin_pct < 50 ? "warn" : "good"}">${pct(e.margin_pct)}</span></td></tr>`).join("")}</tbody></table>`;
+    why("why-alerts", `Los ${A.length} eventos de los últimos 12 meses que se salieron de lo normal. Usted no tiene que estar en cada evento: esta lista le dice a cuáles mirar.`,
+      `Revise esta lista cada lunes con el chef y la coordinadora. En el piloto real, Datia le envía estos casos cada mañana en el resumen y usted puede preguntar al asistente "¿por qué el evento ${A[0]?.id || ""} costó tanto?".`);
+  })();
+
+  // ---------- CRÉDITO ----------
+  (function aging() {
+    const order = ["Por vencer", "0-30", "31-60", "61-90", ">90"], A = D.aging;
+    const col = { "Por vencer": "var(--accent)", "0-30": "var(--warn)", "31-60": "var(--bad)", "61-90": "var(--bad)", ">90": "var(--bad)" };
+    $("ch-aging").innerHTML = hbars(order.map((b) => ({ label: b === "Por vencer" ? "Por vencer" : b + " días vencido", v: A[b], key: b })),
+      { fmt: (v) => v ? rdK(v) : "—", color: (r) => col[r.key], labelW: 130 });
+    const over = order.slice(1).reduce((a, b) => a + A[b], 0);
+    why("why-aging", `Todo lo que los clientes les deben, según cuánto tiempo lleva vencido. ${rdK(over)} ya pasaron su fecha de pago.`,
+      `Todo lo vencido es de un solo cliente (vea la tabla). Cóbrelo antes de aceptarle otro evento. Lo que está por vencer se cobra solo si los clientes siguen pagando como hasta ahora.`);
+  })();
+
+  (function credit() {
+    const C = D.credit.filter((c) => c.debt > 0 || c.status !== "Al día" || c.avg_late != null);
+    const cls = { "Al día": "good", "Revisar": "warn", "Excede límite": "warn", "Suspender crédito": "bad" };
+    $("tb-credit").innerHTML = `<table><thead><tr><th>Cliente</th><th class="r">Debe</th><th class="r">Vencido</th><th class="r">Atraso prom.</th><th class="r">Límite hoy</th><th class="r">Límite sugerido</th><th>Estado</th></tr></thead><tbody>${C.map((c) => `<tr><td>${esc(c.client)}</td><td class="r">${c.debt ? rd(c.debt) : "—"}</td><td class="r">${c.overdue ? rd(c.overdue) : "—"}</td><td class="r">${c.avg_late == null ? "—" : c.avg_late + " d"}</td><td class="r">${rd(c.limit)}</td><td class="r">${rd(c.suggested)}</td><td><span class="pill ${cls[c.status]}">${c.status}</span></td></tr>`).join("")}</tbody></table>`;
+    const bad = D.credit.find((c) => c.status === "Suspender crédito"), over = D.credit.find((c) => c.status === "Excede límite");
+    why("why-credit", `Cuánto debe cada cliente con crédito y cómo ha pagado en el último año. El <em>límite sugerido</em> sale de lo que compró en 6 meses, sus días de crédito y qué tan tarde paga (a tiempo ×1.2; hasta 15 días ×1.0; hasta 30 ×0.7; más ×0.4; cero si tiene algo con más de 90 días). Nunca pasa de 1.5 veces el límite actual.`,
+      `${bad ? `<strong>${esc(bad.client)}</strong> paga en promedio ${bad.avg_late} días tarde y debe ${rd(bad.debt)}: pida pago completo por adelantado en su próximo concierto. ` : ""}${over ? `${esc(over.client)} paga a tiempo pero debe más que su límite: súbale el límite a ${rd(over.suggested)} o pida un abono.` : ""}`);
+  })();
+
+  // ---------- INVENTARIO ----------
+  (function below() {
+    const B = D.inventory.below;
+    $("tb-below").innerHTML = B.length ? `<table><thead><tr><th>Código</th><th>Producto</th><th class="r">Hay</th><th class="r">Mínimo</th><th class="r">Alcanza para</th><th class="r">Pedir</th><th>Suplidor</th></tr></thead><tbody>${B.map((b) => `<tr><td class="mono">${b.code}</td><td>${esc(b.item)}</td><td class="r">${b.stock} ${b.unit}</td><td class="r">${b.min} ${b.unit}</td><td class="r"><span class="pill ${b.days_left != null && b.days_left < 7 ? "bad" : "warn"}">${b.days_left == null ? "—" : b.days_left + " días"}</span></td><td class="r">${b.reorder} ${b.unit}</td><td>${esc(b.supplier)}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Todo está sobre el mínimo.</p>`;
+    why("why-below", `Productos con menos existencia que el mínimo, calculado con el consumo real de los últimos 90 días. La cantidad a pedir lleva el producto a unas dos semanas y media de uso.`,
+      `${B.length ? `El pedido a ${esc(B[0].supplier)} de esta semana no ha llegado. Confirme la entrega hoy o compre a otro suplidor antes del próximo evento con mariscos.` : "Nada urgente."}`);
+  })();
+
+  (function waste() {
+    const W = D.inventory.waste;
+    $("ch-waste").innerHTML = hbars(W.map((w) => ({ label: w.cat, v: w.pct, tip: `${w.cat}: ${pct(w.pct)} de merma\n${rd(w.value)} perdidos en 12 meses` })),
+      { fmt: pct, color: (r) => r.v > 5 ? "var(--warn)" : "var(--accent)", threshold: 5, thresholdLabel: "Aceptable: 5%", labelW: 140 });
+    const top = W[0];
+    why("why-waste", `Qué parte de lo que compraron se dañó o se botó antes de usarse.`,
+      `${top.cat} pierde ${pct(top.pct)} (${rd(top.value)} al año). Compre mariscos dos veces por semana y solo para eventos confirmados, en vez de un pedido grande cada lunes.`);
+  })();
+
+  (function stock() {
+    const S = Object.entries(D.inventory.by_cat).sort((a, b) => b[1] - a[1]);
+    $("ch-stock").innerHTML = hbars(S.map(([c, v]) => ({ label: c, v })), { fmt: rdK, labelW: 160 });
+    const [topCat, topVal] = S[0], total = S.reduce((a, s) => a + s[1], 0);
+    why("why-stock", `Cuánto dinero hay hoy en el almacén, al costo, por categoría. ${topCat} es ${pct(topVal / total * 100)} del total.`,
+      ["Proteínas", "Mariscos", "Vegetales y frutas", "Lácteos"].includes(topCat)
+        ? `Lo que más dinero inmoviliza (${topCat.toLowerCase()}) también se daña rápido: pida más seguido, en menos cantidad y solo para eventos confirmados.`
+        : `${topCat} no se daña: puede comprarla con más días de crédito o en consignación con el suplidor.`);
+  })();
+
+  // ---------- COMPRAS ----------
+  (function suppliers() {
+    const S = D.top_suppliers;
+    $("ch-suppliers").innerHTML = hbars(S.map((s) => ({ label: s.supplier.replace(/ (SRL|SA)$/, "").replace(" (productor)", ""), v: s.total })), { fmt: rdK, labelW: 200 });
+    const fixedCats = /Inmobiliaria|Eléctrica|Telecable/;
+    const goods = S.filter((s) => !fixedCats.test(s.supplier)).slice(0, 2);
+    const share = S.slice(0, 3).reduce((a, s) => a + s.total, 0) / S.reduce((a, s) => a + s.total, 0) * 100;
+    why("why-suppliers", `A quién le compran más, con impuestos, en los últimos 12 meses. Los tres primeros son ${pct(share)} de lo que se ve en el gráfico. El alquiler y la luz son fijos; lo que se puede negociar es la mercancía.`,
+      `Negocie un acuerdo anual con ${goods.map((s) => esc(s.supplier.replace(/ (SRL|SA)$/, ""))).join(" y ")}: con ese volumen, un 3% de descuento o 15 días más de crédito valen más que cambiar de suplidor.`);
+  })();
+
+  (function price() {
+    const P = D.price_trend, M = D.months, names = { "PRO-002": "Pechuga de pollo", "PRO-003": "Filete de res", "MAR-001": "Camarones" };
+    const cols = { "PRO-002": "var(--s1)", "PRO-003": "var(--s2)", "MAR-001": "var(--s3)" };
+    const codes = Object.keys(names).filter((c) => P[c]);
+    const W = 560, H = 240, L = 44, R = 110, Tp = 12, B = 26;
+    const vals = codes.flatMap((c) => P[c].filter((v) => v != null));
+    const lo = Math.floor(Math.min(...vals) / 50) * 50 - 50, hi = Math.ceil(Math.max(...vals) / 50) * 50;
+    const x = (i) => L + i / (M.length - 1) * (W - L - R), y = (v) => Tp + (hi - v) / (hi - lo) * (H - Tp - B);
+    let g = "";
+    ticks(lo, hi, 4).out.forEach((v) => { g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/>` + T(L - 8, y(v) + 4, v, { anchor: "end" }); });
+    M.forEach((m, i) => { if (i % 2 === 0) g += T(x(i), H - 8, mlabel(m), { anchor: "middle", size: 10.5 }); });
+    codes.forEach((c) => {
+      const pts = P[c].map((v, i) => v == null ? null : [x(i), y(v), v, M[i]]).filter(Boolean);
+      g += `<path d="${pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ")}" fill="none" stroke="${cols[c]}" stroke-width="2" stroke-linejoin="round"/>`;
+      pts.forEach((p) => { g += `<circle cx="${p[0]}" cy="${p[1]}" r="9" fill="transparent" data-tip="${esc(`${names[c]} · ${mlabel(p[3])}\nRD$${p[2].toFixed(2)} por libra`)}"/>`; });
+      const last = pts[pts.length - 1];
+      g += `<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="${cols[c]}" stroke="var(--surface)" stroke-width="2"/>` + T(last[0] + 8, last[1] + 4, `${names[c]} ${Math.round(last[2])}`, { fill: "var(--ink)", size: 11 });
+    });
+    $("lg-price").innerHTML = codes.map((c) => `<span><i class="line" style="background:${cols[c]}"></i>${names[c]}</span>`).join("");
+    $("ch-price").innerHTML = svg(W, H, g, "Precio de compra por libra de pechuga, filete de res y camarones");
+    const ch = codes.map((c) => { const v = P[c].filter((x) => x != null); return [names[c], (v[v.length - 1] / v[0] - 1) * 100]; });
+    why("why-price", `Cuánto pagaron por libra cada mes. ${ch.map(([n, p]) => `${n}: ${p >= 0 ? "+" : ""}${pct(p)}`).join("; ")} en el año.`,
+      `Las proteínas subieron más que sus precios de venta. Actualice la lista de precios por invitado al menos cada seis meses, o ponga en los contratos que el menú se ajusta si la proteína sube más de 5%.`);
+  })();
+
+  // ---------- e-CF ----------
+  (function ecf() {
+    const E = D.ecf;
+    $("ecf-days").textContent = E.days_left;
+    why("why-deadline", `Desde el 15 de noviembre de 2026 las empresas pequeñas deben emitir comprobantes fiscales electrónicos (e-CF). Hoy todas sus ventas salen en NCF de papel (B01 y B02).`,
+      `Elija esta semana un proveedor de facturación electrónica certificado por la DGII, pida la certificación y haga las pruebas en octubre. Datia ya lee e-CF: el día que empiecen, sus ventas entran solas cada noche.`);
+    const m = (label, val, max, note) => `<div class="meter"><div class="row"><span>${label}</span><span class="num">${note}</span></div><div class="track"><div class="fill" style="width:${Math.min(100, val / max * 100)}%"></div></div></div>`;
+    $("ecf-meters").innerHTML = [
+      m("Ventas emitidas como e-CF", E.sales_ecf_pct, 100, pct(E.sales_ecf_pct)),
+      m("Compras recibidas como e-CF (por monto)", E.purchases_ecf_pct, 100, `${pct(E.purchases_ecf_pct)} · ${E.purchases_ecf_docs} de ${E.purchases_docs} facturas`),
+      m("Suplidores que ya emiten e-CF", E.suppliers_ecf, E.suppliers, `${E.suppliers_ecf} de ${E.suppliers}`),
+    ].join("") + `<p class="muted" style="font-size:.84rem;">Comprobantes usados en 12 meses: ${E.b01_used} B01 (crédito fiscal), ${E.b02_used} B02 (consumo) y ${E.b11_used} B11 (compras a productores informales).</p>`;
+    why("why-ecf", `Cuánto de su facturación ya es electrónica. Los suplidores grandes (bebidas, licores, pollo, gas, luz, telecable) ya les envían e-CF; ustedes todavía no emiten.`,
+      `Los ${E.b11_used} comprobantes de compras (B11) a productores de vegetales también pasan a e-CF (E41). Inclúyalos en las pruebas con el proveedor.`);
+    const P = D.pipeline, RULE = { totals_add_up: "Los totales no cuadran", date_valid: "Fecha imposible", required_fields: "Falta un dato obligatorio", buyer_is_us: "La factura es de otra empresa", no_duplicate: "Factura repetida" };
+    const items = P.review.map((r) => { const [rule, ...rest] = r.reason.split(": "); return `<li><strong>${RULE[rule] || rule}</strong> · <span class="mono">${esc(r.ncf)}</span> ${esc(r.issuer_name || "venta propia")}<br><span class="muted">${esc(rest.join(": "))}</span></li>`; })
+      .concat(P.rejected.map((r) => `<li><strong>Factura repetida, no se cargó</strong> · <span class="mono">${esc(r.ncf)}</span> ${esc(r.issuer)}</li>`));
+    $("ecf-run").innerHTML = `<div class="steps"><div class="step"><strong class="num" style="color:var(--good)">${P.promote.accepted}</strong><span>facturas pasaron todas las reglas y se cargaron</span></div><div class="step"><strong class="num" style="color:var(--warn)">${P.promote.review}</strong><span>esperan que una persona las revise</span></div><div class="step"><strong class="num" style="color:var(--bad)">${P.promote.rejected}</strong><span>rechazada por estar repetida</span></div></div><ul class="list">${items.join("")}</ul><p class="muted" style="font-size:.84rem;">Archivos DGII generados: <span class="mono">${P.dgii["606"].file}</span> (${P.dgii["606"].lines} compras) y <span class="mono">${P.dgii["607"].file}</span> (${P.dgii["607"].lines} ventas).</p>`;
+    why("why-run", `Lo que encontraron las reglas automáticas en la exportación de septiembre de su sistema: errores de digitación, una factura duplicada y una factura de un suplidor emitida a otra empresa. Ninguno de esos errores llegó al reporte.`,
+      `Corregir estos 6 casos toma 10 minutos en la pantalla de Revisión. El 606 y el 607 salen del mismo dato limpio; su contador solo completa los campos que el sistema todavía no tiene (tipo de bien o servicio y forma de pago).`);
+  })();
+
+  // ---------- PROCEDIMIENTOS ----------
+  (function procesos() {
+    const P = D.process;
+    $("steps").innerHTML = [
+      [P.quote_to_contract, "días del presupuesto al contrato firmado", ""],
+      [P.event_to_invoice, `días del evento a la factura · ${P.late_invoices} facturas salieron con más de 3 días`, P.late_invoices ? "var(--warn)" : ""],
+      [P.invoice_to_cash, `días de la factura al cobro (crédito) · ${P.avg_days_late} días después del vencimiento en promedio`, P.avg_days_late > 5 ? "var(--warn)" : ""],
+    ].map(([v, s, c]) => `<div class="step"><strong style="${c ? `color:${c}` : ""}">${v.toLocaleString("es-DO")}</strong><span>${s}</span></div>`).join("");
+    why("why-steps", `Cuánto tarda cada paso del proceso estándar: presupuesto → contrato → anticipo → evento → factura → cobro.`,
+      `Facture el día siguiente al evento, siempre: cada día de atraso en facturar es un día más que tarda el cobro. Una regla simple para la coordinadora: ningún evento cierra sin su factura enviada en 24 horas.`);
+    const dp = P.deposit_by_type;
+    $("ch-deposit").innerHTML = hbars(TYPES.map((t) => ({ label: t, v: dp[t] })), { fmt: (v) => v + "%", max: 100, color: (r) => r.v < 80 ? "var(--warn)" : "var(--accent)", threshold: 100, thresholdLabel: "Política: 100%", labelW: 100 });
+    why("why-deposit", `En qué porcentaje de los eventos se cobró el anticipo del 50% antes del evento.`,
+      `Las bodas y eventos sociales cumplen; los corporativos solo ${dp.Corporativo}%. Pida al menos 30% de anticipo a las empresas nuevas o a las que pagan tarde, aunque sean clientes grandes.`);
+    $("routine").innerHTML = [
+      "<strong>Cada mañana (5 minutos):</strong> lea el resumen que llega a las 6:30. Si dice <em>todo cuadra</em>, no hace falta más.",
+      "<strong>Cada lunes:</strong> página de eventos con el chef (eventos fuera de rango) y página de inventario con almacén (pedidos de la semana).",
+      "<strong>Cada quincena:</strong> beneficio contra la meta de US$5,000 y la lista de cobros vencidos.",
+      "<strong>Antes de aceptar un evento a crédito:</strong> mire el estado del cliente en Crédito y cobros.",
+      "<strong>Cuando tenga una duda:</strong> pregúntele al asistente en español, por ejemplo «¿cuánto nos debe Bachata Fest y desde cuándo?».",
+    ].map((s) => `<li>${s}</li>`).join("");
+  })();
+})();
+</script>
