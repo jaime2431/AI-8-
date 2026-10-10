@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Data Bridge Analytics">
+  <!-- Data Bridge mark: two data pillars (past, low; future, high) joined by an arch, with a data point crossing it. Larimar blue. -->
+  <rect width="64" height="64" rx="15" fill="#1f7f97"/>
+  <rect x="12" y="34" width="9" height="18" rx="3" fill="#ffffff"/>
+  <rect x="43" y="22" width="9" height="30" rx="3" fill="#ffffff"/>
+  <path d="M16.5 35 Q32 6 47.5 23" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="32" cy="18.5" r="5" fill="#9fe0ee" stroke="#1f7f97" stroke-width="2"/>
+</svg>

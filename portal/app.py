@@ -45,7 +45,7 @@ def render_portal(env: str, nonce: str) -> str:
     inline scripts get the per-request nonce allowed by the Content-Security-Policy."""
     page = WEB.read_text(encoding="utf-8")
     m = re.search(r"<title>.*?</title>", page, re.S)
-    title = m.group(0) if m else "<title>Portal Datia</title>"
+    title = m.group(0) if m else "<title>Portal Data Bridge</title>"
     page = page.replace(title, "", 1).replace("<script>", f'<script nonce="{nonce}">')
     msal = "" if env == "dev" else f'<script src="{MSAL_SCRIPT}" integrity="{MSAL_SRI}" crossorigin="anonymous"></script>'
     return ("<!doctype html><html lang=\"es\"><head><meta charset=\"utf-8\">"
@@ -130,7 +130,7 @@ def create_app(registry: ClientRegistry, context_factory: Callable[[ClientRegist
         except UnknownClient:
             return False
     _known_tenant = known
-    app = FastAPI(title="Datia portal API", version="0.1.0")
+    app = FastAPI(title="Data Bridge portal API", version="0.1.0")
     contexts: dict[str, ClientContext] = {}
 
     def identity(request: Request) -> Identity:

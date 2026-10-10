@@ -10,7 +10,7 @@ from infra.onboard import main
 def test_dry_run_plans_every_step_and_registers_the_client(tmp_path, capsys):
     clients = tmp_path / "clients.json"
     result = main(["--client", "ferrenort", "--name", "Ferretería Norte SRL", "--own-rnc", "131000002",
-                   "--tenant", "AAAAAAAA-0000-0000-0000-00000000C11E", "--subscription", "sub-1", "--sql-admin-group-name", "Datia SQL Admins",
+                   "--tenant", "AAAAAAAA-0000-0000-0000-00000000C11E", "--subscription", "sub-1", "--sql-admin-group-name", "Data Bridge SQL Admins",
                    "--sql-admin-group-id", "grp-1", "--clients-file", str(clients), "--dry-run"])
     cmds = "\n".join(result["commands"])
     assert "deployment group create" in cmds and "client.bicep" in cmds

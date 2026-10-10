@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: Power BI–style report — header with the Datia mark and company, a page strip (one page per owner decision), cards of chart + "qué muestra / qué hacer" */
+/* Layout: Power BI–style report — header with the Data Bridge mark and company, a page strip (one page per owner decision), cards of chart + "qué muestra / qué hacer" */
 :root {
   --bg: #f4f7f7; --surface: #ffffff; --ink: #142a30; --muted: #56707a; --line: #d6e1e3; --grid: #e6eeef;
   --accent: #1f7f97; --accent-2: #8cc9d8; --accent-soft: #dceef2; --spark: #9fe0ee;
@@ -102,8 +102,8 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 <header class="top">
   <div class="top-inner">
     <div class="brand">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="var(--accent)"/><circle cx="27" cy="38" r="11" fill="none" stroke="var(--surface)" stroke-width="7"/><rect x="38" y="12" width="7" height="38" rx="3.5" fill="var(--surface)"/><circle cx="19" cy="17" r="4.5" fill="var(--spark)"/></svg>
-      <div><h1 id="company">Sabor &amp; Escena Catering</h1><div class="sub muted">Tablero de gestión · preparado por Datia</div></div>
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="var(--accent)"/><rect x="12" y="34" width="9" height="18" rx="3" fill="var(--surface)"/><rect x="43" y="22" width="9" height="30" rx="3" fill="var(--surface)"/><path d="M16.5 35 Q32 6 47.5 23" fill="none" stroke="var(--surface)" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="18.5" r="5" fill="#9fe0ee" stroke="var(--accent)" stroke-width="2"/></svg>
+      <div><h1 id="company">Sabor &amp; Escena Catering</h1><div class="sub muted">Tablero de gestión · preparado por Data Bridge Analytics</div></div>
       <div class="asof muted" id="asof"></div>
     </div>
     <nav class="pages" role="tablist" aria-label="Páginas del tablero">
@@ -2004,7 +2004,7 @@ const D = {
     const A = D.events.filter((e) => e.food_pct > 30 || e.margin_pct < 50).sort((a, b) => b.date.localeCompare(a.date));
     $("tb-alerts").innerHTML = `<table><thead><tr><th>Evento</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th class="r">Invitados</th><th class="r">Venta</th><th class="r">Alimentos</th><th class="r">Personal</th><th class="r">Margen</th></tr></thead><tbody>${A.map((e) => `<tr><td class="mono">${e.id}</td><td>${e.date}</td><td>${e.type}</td><td>${esc(e.client)}</td><td class="r">${e.guests}</td><td class="r">${rd(e.rev)}</td><td class="r"><span class="pill ${e.food_pct > 30 ? "bad" : "good"}">${pct(e.food_pct)}</span></td><td class="r">${pct(e.staff_pct)}</td><td class="r"><span class="pill ${e.margin_pct < 50 ? "warn" : "good"}">${pct(e.margin_pct)}</span></td></tr>`).join("")}</tbody></table>`;
     why("why-alerts", `Los ${A.length} eventos de los últimos 12 meses que se salieron de lo normal. Usted no tiene que estar en cada evento: esta lista le dice a cuáles mirar.`,
-      `Revise esta lista cada lunes con el chef y la coordinadora. En el piloto real, Datia le envía estos casos cada mañana en el resumen y usted puede preguntar al asistente "¿por qué el evento ${A[0]?.id || ""} costó tanto?".`);
+      `Revise esta lista cada lunes con el chef y la coordinadora. En el piloto real, Data Bridge le envía estos casos cada mañana en el resumen y usted puede preguntar al asistente "¿por qué el evento ${A[0]?.id || ""} costó tanto?".`);
   })();
 
   // ---------- CRÉDITO ----------
@@ -2095,7 +2095,7 @@ const D = {
     const E = D.ecf;
     $("ecf-days").textContent = E.days_left;
     why("why-deadline", `Desde el 15 de noviembre de 2026 las empresas pequeñas deben emitir comprobantes fiscales electrónicos (e-CF). Hoy todas sus ventas salen en NCF de papel (B01 y B02).`,
-      `Elija esta semana un proveedor de facturación electrónica certificado por la DGII, pida la certificación y haga las pruebas en octubre. Datia ya lee e-CF: el día que empiecen, sus ventas entran solas cada noche.`);
+      `Elija esta semana un proveedor de facturación electrónica certificado por la DGII, pida la certificación y haga las pruebas en octubre. Data Bridge ya lee e-CF: el día que empiecen, sus ventas entran solas cada noche.`);
     const m = (label, val, max, note) => `<div class="meter"><div class="row"><span>${label}</span><span class="num">${note}</span></div><div class="track"><div class="fill" style="width:${Math.min(100, val / max * 100)}%"></div></div></div>`;
     $("ecf-meters").innerHTML = [
       m("Ventas emitidas como e-CF", E.sales_ecf_pct, 100, pct(E.sales_ecf_pct)),

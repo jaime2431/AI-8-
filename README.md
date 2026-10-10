@@ -1,4 +1,4 @@
-# Datia backbone
+# Data Bridge Analytics backbone
 
 Codebase for the data and AI service: one clean database per client, validation rules,
 Claude agents, Power BI refresh and quality checks, daily DGII and Banco Central reference
@@ -89,7 +89,7 @@ az login --tenant <client-tenant-id>          # our admin account, access throug
 export ANTHROPIC_ADMIN_KEY=sk-ant-admin-...   # creates the client's Claude workspace
 python infra/onboard.py --client ferrenort --name "Ferretería Norte SRL" --own-rnc 131000002 \
     --tenant <client-tenant-id> --subscription <client-subscription-id> \
-    --sql-admin-group-name "Datia SQL Admins" --sql-admin-group-id <group-object-id> --dry-run   # then without --dry-run
+    --sql-admin-group-name "Data Bridge SQL Admins" --sql-admin-group-id <group-object-id> --dry-run   # then without --dry-run
 ```
 
 The script creates or reuses everything it can and ends with the steps that need a person: GDAP approval,

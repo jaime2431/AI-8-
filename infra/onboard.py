@@ -5,7 +5,7 @@ through GDAP). Every step prints what it does; --dry-run prints the plan without
 
   python infra/onboard.py --client ferrenort --name "Ferretería Norte SRL" --own-rnc 131000002 \
       --tenant <client-tenant-id> --subscription <client-subscription-id> \
-      --sql-admin-group-name "Datia SQL Admins" --sql-admin-group-id <group-object-id> [--dry-run]
+      --sql-admin-group-name "Data Bridge SQL Admins" --sql-admin-group-id <group-object-id> [--dry-run]
 
 Environment:
   ANTHROPIC_ADMIN_KEY   our Claude Console Admin API key (sk-ant-admin...), to create the client's workspace
@@ -14,7 +14,7 @@ Environment:
 What it does:
   1. resource group + Azure template (database, storage, Key Vault, job identity)
   2. Power BI service principal in the client's tenant
-  3. Power BI workspaces "Datia Test - <name>" and "Datia Live - <name>", service principal as Member
+  3. Power BI workspaces "Data Bridge Test - <name>" and "Data Bridge Live - <name>", service principal as Member
   4. Claude Console workspace for the client
   5. secrets into the client's Key Vault
   6. SQL script that gives the job identity access to the clean database
@@ -108,27 +108,27 @@ def check_tenant(a, clients_file: Path) -> None:
 
 def onboard(a, run: Runner, clients_file: Path) -> dict:
     slug, name = a.client, a.name
-    rg = f"rg-datia-{slug}"
+    rg = f"rg-dba-{slug}"
     secrets: dict[str, str] = {}
     check_tenant(a, clients_file)
 
     step(1, "Azure resources (database, storage, Key Vault, job identity)")
     run.az("account", "set", "--subscription", a.subscription)
     me = run.az("ad", "signed-in-user", "show", fake={"id": "44444444-0000-0000-0000-00000000de91"})
-    run.az("group", "create", "-n", rg, "-l", a.location, "--tags", f"client={slug}", "managedBy=datia")
+    run.az("group", "create", "-n", rg, "-l", a.location, "--tags", f"client={slug}", "managedBy=databridge")
     dep = run.az("deployment", "group", "create", "-g", rg, "-f", str(ROOT / "infra" / "client.bicep"),
                  "-p", f"clientSlug={slug}", f"sqlAdminGroupName={a.sql_admin_group_name}",
                  f"sqlAdminGroupObjectId={a.sql_admin_group_id}", f"deployerObjectId={me['id']}",
                  fake={"properties": {"outputs": {
-                     "sqlServer": {"value": f"sql-datia-{slug}-x.database.windows.net"}, "sqlDatabase": {"value": "clean"},
-                     "keyVaultName": {"value": f"kv-datia-{slug}-x"}, "keyVaultUri": {"value": f"https://kv-datia-{slug}-x.vault.azure.net/"},
-                     "storageAccount": {"value": f"stdatia{slug}x"}, "jobIdentityName": {"value": f"id-datia-{slug}"},
+                     "sqlServer": {"value": f"sql-dba-{slug}-x.database.windows.net"}, "sqlDatabase": {"value": "clean"},
+                     "keyVaultName": {"value": f"kv-dba-{slug}-x"}, "keyVaultUri": {"value": f"https://kv-dba-{slug}-x.vault.azure.net/"},
+                     "storageAccount": {"value": f"stdba{slug}x"}, "jobIdentityName": {"value": f"id-dba-{slug}"},
                      "jobIdentityClientId": {"value": "00000000-0000-0000-0000-00000000c1d0"}}}})
     out = {k: v["value"] for k, v in dep["properties"]["outputs"].items()}
     secrets["database-url"] = sql_url(out["sqlServer"], out["sqlDatabase"], out["jobIdentityClientId"])
 
     step(2, "Power BI service principal in the client's tenant (reused if it already exists)")
-    app_name = f"Datia Power BI - {name}"
+    app_name = f"Data Bridge Power BI - {name}"
     found = run.az("ad", "app", "list", "--display-name", app_name, fake=[])
     if found:
         app = found[0]
@@ -141,7 +141,7 @@ def onboard(a, run: Runner, clients_file: Path) -> dict:
     secret_expiry = None
     if not found or a.rotate_secret:
         cred = run.az("ad", "app", "credential", "reset", "--id", app["appId"], "--years", "1", "--append",
-                      "--display-name", "datia-pipeline", fake={"password": "dry-run-secret"})
+                      "--display-name", "databridge-pipeline", fake={"password": "dry-run-secret"})
         secrets["powerbi-client-secret"] = cred["password"]
         secret_expiry = (date.today() + timedelta(days=365)).isoformat()
         print(f"  new client secret, expires {secret_expiry}: put a renewal reminder 30 days before")
@@ -153,7 +153,7 @@ def onboard(a, run: Runner, clients_file: Path) -> dict:
     hdr = {"Authorization": f"Bearer {tok}"}
     workspaces = {}
     for kind in ("Test", "Live"):
-        ws_name = f"Datia {kind} - {name}"
+        ws_name = f"Data Bridge {kind} - {name}"
         existing = run.http("GET", f"{PBI}/groups", headers=hdr, params={"$filter": f"name eq '{ws_name}'"},
                             fake={"value": []}).get("value", [])
         if existing:
@@ -176,10 +176,10 @@ def onboard(a, run: Runner, clients_file: Path) -> dict:
     admin_key = os.environ.get("ANTHROPIC_ADMIN_KEY", "")
     if admin_key or run.dry_run:
         cw = run.http("POST", ANTHROPIC, headers={"x-api-key": admin_key, "anthropic-version": "2023-06-01"},
-                      json={"name": f"datia-{slug}"}, fake={"id": "wrkspc_dryrun"})
+                      json={"name": f"databridge-{slug}"}, fake={"id": "wrkspc_dryrun"})
         print(f"  Claude workspace: {cw.get('id')}")
     else:
-        print("  ANTHROPIC_ADMIN_KEY not set: create the workspace 'datia-%s' in the Claude Console by hand." % slug)
+        print("  ANTHROPIC_ADMIN_KEY not set: create the workspace 'databridge-%s' in the Claude Console by hand." % slug)
     if os.environ.get("CLIENT_ANTHROPIC_KEY"):
         secrets["anthropic-api-key"] = os.environ["CLIENT_ANTHROPIC_KEY"]
 
@@ -231,7 +231,7 @@ def onboard(a, run: Runner, clients_file: Path) -> dict:
         f"az keyvault secret set --vault-name {out['keyVaultName']} -n anthropic-api-key --value <key>"
         if "anthropic-api-key" not in secrets else "Set the monthly spend limit on the client's Claude workspace.",
         "Power BI admin portal (client tenant): allow service principals to use Power BI APIs, the executeQueries "
-        "API and the MCP server endpoint, for a security group that contains the Datia service principal.",
+        "API and the MCP server endpoint, for a security group that contains the Data Bridge service principal.",
         "Publish the semantic model and report to the Test workspace, check numbers, then to Live; put dataset_id and "
         "report_id in clients.json and add the QA checks with the client's DAX measures.",
         "Assign the client's users to the portal app; give the Reviewer role to the people who approve invoices.",

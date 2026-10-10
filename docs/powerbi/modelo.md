@@ -1,4 +1,4 @@
-# Modelo Power BI — Sabor & Escena Catering SRL (piloto Datia)
+# Modelo Power BI — Sabor & Escena Catering SRL (piloto Data Bridge Analytics)
 
 Versión 1.0 · 7-oct-2026 · Medidas en `medidas.dax` · Pasos de armado en `README.md`
 
