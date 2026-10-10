@@ -154,7 +154,7 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
   <section id="view-model" hidden style="display:grid;gap:20px;">
     <div class="panel">
       <h2>Budget with the real team</h2>
-      <p class="lede muted">The business plan's 36-month model with one change, as decided on Oct 10: the team is a director with no salary and two developers at RD$30,000 a month each (plus the plan's 30% employer charges). Clients, prices, setup costs and other monthly costs stay as in the plan. The money comes 30% from investors and 70% from a bank loan at 9%, 5 years, interest-only for the first 6 months.</p>
+      <p class="lede muted">The business plan's 36-month model with one change, as decided on Oct 10: the team is a director with no salary and two developers at RD$30,000 a month each, which really cost RD$41,060 each once social security, INFOTEP, Christmas salary, vacation and the severance reserve are added. Clients, prices, setup costs and other monthly costs stay as in the plan. The money comes 30% from investors and 70% from a bank loan at 9%, 5 years, interest-only for the first 6 months.</p>
       <div class="note warn" id="model-insight"></div>
     </div>
     <div class="model">
@@ -346,7 +346,7 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 
   // ---------- money model ----------
   const FX = 61.4111;                                   // Banco Central sell rate, Oct 2026
-  const TEAM = 2 * 30000 * 1.30 / FX;                   // two developers, RD$30,000 + 30% employer charges; director RD$0
+  const TEAM = 2 * 41060 / FX;                         // two developers: RD$30,000 + 37% (TSS, INFOTEP, regalía, vacation, severance reserve) = RD$41,060; director RD$0
   const OTHER = 4300 + 970;                             // plan: coworking, software, marketing, accountant, lawyer, contingency + hosting, pen test, insurance
   const SETUP = 41500;                                  // plan's one-time setup
   const PLAN_EBITDA = [-28400, 303700, 782600];
@@ -440,7 +440,7 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
     drawChart(f.cash, slow.cash);
     $("years").innerHTML = f.yr.map((y, i) => `<tr><td>Year ${i + 1}</td><td class="r">${Math.round(y.clients)}</td><td class="r">${fmt(y.rev)}</td><td class="r">${fmt(y.ebitda)}</td><td class="r">${fmt(y.interest)}</td><td class="r">${fmt(y.tax)}</td><td class="r">${fmt(y.ebitda - y.interest - y.tax)}</td><td class="r muted">${fmt(PLAN_EBITDA[i])}</td></tr>`).join("");
     const y3 = f.yr[2];
-    $("model-insight").innerHTML = `<strong>Read this before showing it to an investor or a bank.</strong> The raise falls from US$150,000 to <strong>${fmtK(R)}</strong> because the team costs ${fmt(TEAM)} a month instead of about US$14,000. But the plan's client numbers still assume analysts: about ${Math.round(y3.clients)} clients by year 3, at 8–10 clients per analyst. Two developers and the automation will not serve that many alone, so year-3 EBITDA of ${pct(y3.ebitda / y3.rev)} of revenue is the ceiling, not a forecast. Hire on signed clients (about one analyst per 8–10). From month 37 the director earns RD$300,000 a month (about ${fmt(300000 * 1.3 / FX)} with charges) and his 10% stake becomes 3%.`;
+    $("model-insight").innerHTML = `<strong>Read this before showing it to an investor or a bank.</strong> The raise falls from US$150,000 to <strong>${fmtK(R)}</strong> because the team costs ${fmt(TEAM)} a month instead of about US$14,000. But the plan's client numbers still assume analysts: about ${Math.round(y3.clients)} clients by year 3, at 8–10 clients per analyst. Two developers and the automation will not serve that many alone, so year-3 EBITDA of ${pct(y3.ebitda / y3.rev)} of revenue is the ceiling, not a forecast. Hire on signed clients (about one analyst per 8–10). From month 37 the director earns RD$300,000 a month (about ${fmt(300000 * 1.37 / FX)} with charges) and his 10% stake becomes 3%.`;
   }
   const pct = (v) => Math.round(v * 100) + "%";
   Object.values(ctl).forEach((c) => c.addEventListener("input", updateModel));
