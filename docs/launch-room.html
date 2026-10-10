@@ -155,16 +155,17 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
   <section id="view-model" hidden style="display:grid;gap:20px;">
     <div class="panel">
       <h2>Budget with the real team</h2>
-      <p class="lede muted">The business plan's 36-month model with one change, as decided on Oct 10: the team is a director with no salary and two developers at RD$30,000 a month each, which really cost RD$41,060 each once social security, INFOTEP, Christmas salary, vacation and the severance reserve are added. Clients, prices, setup costs and other monthly costs stay as in the plan. The money comes 30% from investors and 70% from a bank loan at 9%, 5 years, interest-only for the first 6 months.</p>
+      <p class="lede muted">Approved Oct 10. The team is a director with no salary and three developers at RD$30,000 a month each (RD$41,060 each with social security, INFOTEP, Christmas salary, vacation and the severance reserve). Prices are the approved ones (platform fee US$162.50). Monthly costs are the verified US$1,443 plus the hidden fees found in the research. Legal setup is RD$50,000. The client ramp and the rest of the setup stay as in the plan. The money comes 30% from investors and 70% from a dollar bank loan at 6%, 5 years, interest-only for the first 6 months.</p>
       <div class="note warn" id="model-insight"></div>
     </div>
     <div class="model">
       <div class="panel" id="controls">
         <div class="ctl"><div class="row"><label for="c-speed">Sales speed</label><output id="o-speed"></output></div><input type="range" id="c-speed" min="40" max="150" step="5" value="100"><small>100% = plan ramp: 2, then 3, then 4 new clients a month</small></div>
         <div class="ctl"><div class="row"><label for="c-churn">Monthly churn</label><output id="o-churn"></output></div><input type="range" id="c-churn" min="0" max="5" step="0.25" value="1.5"><small>Plan: 1.5%</small></div>
-        <div class="ctl"><div class="row"><label for="c-rec">Avg. recurring per client</label><output id="o-rec"></output></div><input type="range" id="c-rec" min="900" max="2600" step="10" value="1690"><small>Plan: US$1,690 (Crecimiento-weighted, 5% fee included)</small></div>
+        <div class="ctl"><div class="row"><label for="c-rec">Avg. recurring per client</label><output id="o-rec"></output></div><input type="range" id="c-rec" min="900" max="2600" step="2" value="1714"><small>Approved prices: US$1,714 (Crecimiento-weighted, platform fee US$162.50, 5% fee included)</small></div>
         <div class="ctl"><div class="row"><label for="c-lag">Go-live lag</label><output id="o-lag"></output></div><input type="range" id="c-lag" min="0" max="3" step="1" value="0"><small>Months between signing and first monthly invoice. Plan assumes 0</small></div>
-        <div class="ctl"><div class="row"><label for="c-rate">Bank interest</label><output id="o-rate"></output></div><input type="range" id="c-rate" min="6" max="16" step="0.5" value="9"><small>Decided: 9% a year</small></div>
+        <div class="ctl"><div class="row"><label for="c-rate">Bank interest</label><output id="o-rate"></output></div><input type="range" id="c-rate" min="4" max="16" step="0.5" value="6"><small>Decided: 6% a year, dollar loan</small></div>
+        <div class="ctl"><div class="row"><label for="c-extra">Costs not priced yet</label><output id="o-extra"></output></div><input type="range" id="c-extra" min="0" max="5000" step="100" value="0"><small>Coworking, marketing, phones, travel. Add them here when you have quotes</small></div>
         <button class="btn" id="reset" type="button">Back to the decided budget</button>
       </div>
       <div style="display:grid;gap:20px;min-width:0;">
@@ -181,10 +182,10 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
         <div class="panel">
           <h3>By year</h3>
           <div class="table-wrap"><table>
-            <thead><tr><th>Year</th><th class="r">Clients</th><th class="r">Revenue</th><th class="r">EBITDA</th><th class="r">Interest</th><th class="r">Income tax</th><th class="r">Net</th><th class="r">Plan EBITDA</th></tr></thead>
+            <thead><tr><th>Year</th><th class="r">Clients</th><th class="r">Revenue</th><th class="r">EBITDA</th><th class="r">Interest</th><th class="r">Profit sharing</th><th class="r">Income tax</th><th class="r">Net</th><th class="r">Plan EBITDA</th></tr></thead>
             <tbody id="years"></tbody>
           </table></div>
-          <p class="muted" style="font-size:.8rem;">US$. The raise is the smallest amount, in steps of US$5,000, that keeps cash above zero when sales are 30% slower and above three months of fixed costs at normal speed. It pays the US$41,500 setup and the first months. Income tax is 27% of the year's profit, paid in April of the next year, with no loss carry-forward (as in the plan). "Plan EBITDA" is the original plan with a team of 14, for comparison.</p>
+          <p class="muted" style="font-size:.8rem;">US$. The raise is the smallest amount, in steps of US$5,000, that keeps cash above zero when sales are 30% slower and above three months of fixed costs at normal speed. It pays the setup (US$38,314: the plan's US$41,500 with the legal setup at RD$50,000) and the bank's opening fee. Profit sharing is the legal 10% of profit for the developers, capped at 45 days' salary each. Income tax is 27% of the year's profit. Both are paid in April of the next year; no loss carry-forward. "Plan EBITDA" is the original plan with a team of 14, for comparison.</p>
         </div>
       </div>
     </div>
@@ -197,15 +198,31 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
       <p class="lede muted">Every permit, membership, certification and tool Data Bridge Analytics needs, with its real price and source, researched on Oct 10, 2026. Items marked <span class="tag block">unconfirmed</span> had no official or current source: get a quote before relying on them.</p>
       <div class="kpis">
         <div class="kpi ok"><strong>US$1,443</strong><span>verified monthly costs besides salaries</span></div>
-        <div class="kpi"><strong>US$5,270</strong><span>what the budget keeps for them (plan, unchanged)</span></div>
-        <div class="kpi"><strong>US$412–1,299</strong><span>legal setup of the SRL (RD$25k–80k)</span></div>
-        <div class="kpi warn"><strong>+15%</strong><span>withholding on Claude and foreign licenses (Ley 30-26)</span></div>
+        <div class="kpi warn"><strong>US$37</strong><span>hidden monthly fees, plus US$65 per client</span></div>
+        <div class="kpi"><strong>RD$50,000</strong><span>legal setup of the SRL (US$814), confirmed</span></div>
+        <div class="kpi"><strong>US$60,000</strong><span>approved raise with these costs</span></div>
       </div>
-      <p class="muted" style="font-size:.85rem;">The verified US$1,443 a month: accountant, Microsoft partner package, Claude Team, GitHub, 1Password, Azure, domain, insurance and an annual pen test. The budget keeps the plan's US$5,270, which leaves about US$3,800 a month for items not priced yet: coworking, marketing, phones, a lawyer on retainer, bank fees.</p>
+      <p class="muted" style="font-size:.85rem;">The verified US$1,443 a month: accountant, Microsoft partner package, Claude Team, GitHub, 1Password, Azure, domain, insurance and an annual pen test. The budget now uses it, plus the hidden fees below. Coworking, marketing and phones are not priced yet; add them in the Money model when you have quotes.</p>
     </div>
     <div class="panel">
-      <h3>Pricing recommendation</h3>
-      <p class="lede">Keep the package prices. Raise the <strong>platform &amp; security fee from US$139 to US$162.50</strong>. The real pen test and insurance (about US$12,700 a year, shared by the first 10 clients) and hosting (about US$19 per client) cost about US$125 per client a month; the plan adds a 30% margin. Licenses still leave about 47% margin (was 59%) after the monthly-term premium and the 15% withholding.</p>
+      <h3>Hidden fees, now in the budget</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Fee</th><th>Why</th><th class="r">In the budget</th></tr></thead>
+        <tbody>
+          <tr><td>15% withholding on licenses and Claude API</td><td>Ley 30-26, since June 2026: paying foreign software or cloud providers</td><td class="r" rowspan="2">+US$65.20 per client a month</td></tr>
+          <tr><td>Power BI monthly-term premium</td><td>Monthly seats cost US$16.80, not US$14, so clients can leave without a year's commitment</td></tr>
+          <tr><td>15% withholding on our own tools</td><td>Partner package, Claude Team, GitHub, 1Password and Azure are foreign</td><td class="r">US$32 a month</td></tr>
+          <tr><td>Renewals</td><td>Cámara de Comercio every 2 years (RD$3,300), Ministerio de Trabajo register every January</td><td class="r">US$5 a month</td></tr>
+          <tr><td>Profit sharing (bonificación)</td><td>Labor Code Art. 223: 10% of profit, max 45 days' salary per developer, in profitable years</td><td class="r">up to US$2,767 a year</td></tr>
+          <tr><td>Bank opening fee</td><td>Usual commission on a new loan (estimate: 1%)</td><td class="r">US$420 once</td></tr>
+          <tr><td>Severance and vacation reserve</td><td>Already inside the RD$41,060 cost of each developer</td><td class="r">included</td></tr>
+        </tbody>
+      </table></div>
+      <p class="muted" style="font-size:.8rem;">Not added because they cost nothing in the end: the 1% asset tax (credited against income tax) and withholdings by government clients (they reduce cash for a while, not profit). Risks to watch rather than budget: exam retakes (US$59–99 each) and Azure log volume above 5 GB a month.</p>
+    </div>
+    <div class="panel">
+      <h3>Approved prices</h3>
+      <p class="lede">Approved Oct 10: keep the package prices. Raise the <strong>platform &amp; security fee from US$139 to US$162.50</strong>. The real pen test and insurance (about US$12,700 a year, shared by the first 10 clients) and hosting (about US$19 per client) cost about US$125 per client a month; the plan adds a 30% margin. Licenses still leave about 47% margin (was 59%) after the monthly-term premium and the 15% withholding.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Package</th><th class="r">Package</th><th class="r">Platform fee</th><th class="r">+5% fee</th><th class="r">Monthly total</th><th class="r">Was</th></tr></thead>
         <tbody>
@@ -219,10 +236,10 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
     <div class="panel">
       <h3>Legal flags for your lawyer</h3>
       <ul style="margin:0;padding-left:18px;display:grid;gap:6px;">
-        <li>An SRL cannot issue bonds (Ley 479-08, Art. 91). Give the director his 10% as cuotas at incorporation, with a partners' agreement that sets the change to 3% plus salary at month 37. An SAS handles this more cleanly.</li>
+        <li>Decided: the director gets his 10% as cuotas at incorporation, with a partners' agreement (pacto de socios) that changes it to 3% plus RD$300,000 a month at month 37. An SRL cannot issue bonds (Ley 479-08, Art. 91), so the lawyer writes it this way.</li>
         <li>An SRL needs at least 2 partners (Art. 89), and cuotas must be fully paid at formation; work does not count as a contribution (Art. 92).</li>
         <li>An unpaid director who works full time could be treated as an employee. Put the arrangement in writing.</li>
-        <li>9% is below the market rate for SME loans (13.5% average in April 2026; Promipyme 12%). A new company usually needs the director's personal guarantee.</li>
+        <li>The loan is in dollars at 6%, secured by the founder. Ask the bank for its full cost sheet (opening fee, credit life insurance, legal fees) before signing.</li>
       </ul>
     </div>
     <div class="panel"><h3>Cost register</h3><div class="table-wrap" id="cost-table"></div></div>
@@ -274,9 +291,9 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
       ["pilots", "Pilot clients", "Names of the first 5 companies to approach. Deferred until every part is tested and the company has its permits and certifications; the offer is to digitize each client's past, present and future.", false, "You", "Deferred"],
       ["fxrule", "Dollar rate rule", "Banco Central sell rate (the default). Today: 61.4111.", false, "You", "Decided Oct 10"],
       ["templates", "First industry templates", "Medical, logistics, retail and bulk management (granel / wholesale distribution).", false, "You", "Decided Oct 10"],
-      ["prices", "Prices final", "Recommendation after the cost research: keep packages, raise the platform fee to US$162.50, so US$947.63 / 1,567.13 / 3,268.13 a month. See Costs & prices. Waiting for your yes.", false, "You", "Recommendation ready"],
-      ["region", "Azure region", "Where our servers and client databases run. Recommended: East US 2 (Virginia): every service we use is there, it is among the cheapest regions, and from Santo Domingo it answers fast enough for a web portal. Alternatives: Mexico Central (closer, newer, check that Container Apps and SQL serverless are offered) or Brazil South (more expensive, slower from the DR). DR law does not require data to stay in the country. Waiting for your answer.", false, "You", "Explained; waiting for your answer"],
-      ["raise", "Raise", "Recalculated in the Money model with the new team (director with no salary, two developers at RD$30,000): 30% equity and 70% bank loan at 9%, 5 years with 6 months interest-only.", false, "You", "Decided Oct 10"] ] },
+      ["prices", "Prices final", "Approved: packages unchanged, platform fee US$162.50, so US$947.63 / 1,567.13 / 3,268.13 a month plus activation and 5%.", false, "You", "Decided Oct 10"],
+      ["region", "Azure region", "Where our servers and client databases run. Recommended: East US 2 (Virginia): every service we use is there, it is among the cheapest regions, and from Santo Domingo it answers fast enough for a web portal. Chosen: East US 2. It is the setup script's default.", false, "You", "Decided Oct 10"],
+      ["raise", "Raise", "Approved: director with no salary and three developers; US$60,000 raise, 30% equity and 70% dollar bank loan at 6%, 5 years with 6 months interest-only.", false, "You", "Approved Oct 10"] ] },
     { id: "accounts", name: "3. Accounts and access", items: [
       ["legal", "Legal entity", "SRL, RNC, company bank account.", true, "You + lawyer"],
       ["m365", "Microsoft 365", "Company tenant and emails with MFA for all staff.", true, "You"],
@@ -385,13 +402,17 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 
   // ---------- money model ----------
   const FX = 61.4111;                                   // Banco Central sell rate, Oct 2026
-  const TEAM = 2 * 41060 / FX;                         // two developers: RD$30,000 + 37% (TSS, INFOTEP, regalía, vacation, severance reserve) = RD$41,060; director RD$0
-  const OTHER = 4300 + 970;                             // plan: coworking, software, marketing, accountant, lawyer, contingency + hosting, pen test, insurance
-  const SETUP = 41500;                                  // plan's one-time setup
+  const TEAM = 3 * 41060 / FX;                         // three developers: RD$30,000 + 37% (TSS, INFOTEP, regalía, vacation, severance reserve) = RD$41,060; director RD$0
+  const VERIFIED = 1443;                                // accountant, partner package, Claude Team, GitHub, 1Password, Azure, domain, insurance, pen test
+  const HIDDEN = 214 * 0.15 + 5;                        // 15% withholding on foreign tools (Ley 30-26) + Cámara and DGT-3 renewals
+  const SETUP = 41500 - 4000 + 50000 / FX;              // plan's setup with the real legal cost: RD$50,000 instead of US$4,000
+  const LOAN_FEE = 0.01;                                // bank opening commission (estimate)
+  const DIRECT = 420 + 65.2;                            // plan's direct cost + Power BI monthly-term premium + 15% withholding on licenses and Claude API
+  const BONUS_CAP = 3 * 45 * 30000 / 23.83 / FX;        // profit sharing: 10% of profit, max 45 days' salary per developer a year
   const PLAN_EBITDA = [-28400, 303700, 782600];
   const adds = (m) => m < 3 ? 0 : m <= 12 ? 2 : m <= 24 ? 3 : 4;
 
-  function operations({ speed = 1, churn = 0.015, rec = 1690, lag = 0 }) {
+  function operations({ speed = 1, churn = 0.015, rec = 1714, lag = 0, extra = 0 }) {
     let clients = 0, signed = 0, carry = 0; const pipe = [], rows = [];
     for (let m = 1; m <= 36; m++) {
       carry += adds(m) * speed; const nw = Math.floor(carry + 1e-9); carry -= nw;
@@ -401,29 +422,33 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
       const one = nw * 3412.5 + (nw - disc) * 3500 + disc * 2100 + nw * 0.4 * 2500 * 1.05;
       signed += nw;
       const rev = clients * rec + one;
-      const direct = clients * 420 + nw * (0.05 * 12 * rec + 350);
-      rows.push({ m, clients, rev, ebitda: rev - direct - TEAM - OTHER });
+      const direct = clients * DIRECT + nw * (0.05 * 12 * rec + 350);
+      rows.push({ m, clients, rev, ebitda: rev - direct - TEAM - VERIFIED - HIDDEN - extra });
     }
     return rows;
   }
 
   function financed(rows, raise, rate) {
     const loan = 0.7 * raise, i = rate / 12, pay = loan * i / (1 - Math.pow(1 + i, -54));
-    let bal = loan, cash = raise - SETUP; const yr = [0, 1, 2].map(() => ({ rev: 0, ebitda: 0, interest: 0, tax: 0, clients: 0 })), out = [];
+    let bal = loan, cash = raise - SETUP - loan * LOAN_FEE; const yr = [0, 1, 2].map(() => ({ rev: 0, ebitda: 0, interest: 0, bonus: 0, tax: 0, clients: 0 })), out = [];
     for (const r of rows) {
       const it = bal * i, prin = r.m <= 6 ? 0 : pay - it, y = Math.floor((r.m - 1) / 12);
       bal -= prin; cash += r.ebitda - it - prin;
       Object.assign(yr[y], { rev: yr[y].rev + r.rev, ebitda: yr[y].ebitda + r.ebitda, interest: yr[y].interest + it, clients: r.clients });
-      if (r.m === 16) cash -= yr[0].tax;                // income tax paid in April of the next year
-      if (r.m === 28) cash -= yr[1].tax;
-      if (r.m % 12 === 0) yr[y].tax = Math.max(0, yr[y].ebitda - yr[y].interest) * 0.27;
+      if (r.m === 16) cash -= yr[0].tax + yr[0].bonus;  // income tax and profit sharing paid in April of the next year
+      if (r.m === 28) cash -= yr[1].tax + yr[1].bonus;
+      if (r.m % 12 === 0) {
+        const profit = Math.max(0, yr[y].ebitda - yr[y].interest);
+        yr[y].bonus = Math.min(profit * 0.10, BONUS_CAP);
+        yr[y].tax = Math.max(0, profit - yr[y].bonus) * 0.27;
+      }
       out.push({ m: r.m, cash });
     }
     return { cash: out, yr, pay, loan, interestOnly: loan * i };
   }
 
   function raiseNeeded(p) {
-    const reserve = 3 * (TEAM + OTHER), base = operations(p), slow = operations({ ...p, speed: p.speed * 0.7 });
+    const reserve = 3 * (TEAM + VERIFIED + HIDDEN + p.extra), base = operations(p), slow = operations({ ...p, speed: p.speed * 0.7 });
     for (let R = 5000; R <= 1000000; R += 5000) {
       if (Math.min(...financed(slow, R, p.rate).cash.map((c) => c.cash)) >= 0 &&
           Math.min(...financed(base, R, p.rate).cash.map((c) => c.cash)) >= reserve) return R;
@@ -434,10 +459,10 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
   const fmtK = (v) => (v < 0 ? "−" : "") + "US$" + Math.round(Math.abs(v) / 1000).toLocaleString("en-US") + "k";
   const fmt = (v) => (v < 0 ? "−" : "") + "US$" + Math.round(Math.abs(v)).toLocaleString("en-US");
   const fmtRD = (v) => "RD$" + (v / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 }) + " M";
-  const ctl = { speed: $("c-speed"), churn: $("c-churn"), rec: $("c-rec"), lag: $("c-lag"), rate: $("c-rate") };
+  const ctl = { speed: $("c-speed"), churn: $("c-churn"), rec: $("c-rec"), lag: $("c-lag"), rate: $("c-rate"), extra: $("c-extra") };
 
-  function drawChart(base, slow) {
-    const W = 640, H = 260, L = 60, R = 16, T = 16, B = 34, reserve = 3 * (TEAM + OTHER);
+  function drawChart(base, slow, extra) {
+    const W = 640, H = 260, L = 60, R = 16, T = 16, B = 34, reserve = 3 * (TEAM + VERIFIED + HIDDEN + extra);
     const vals = base.map((c) => c.cash).concat(slow.map((c) => c.cash), [0]);
     let lo = Math.min(...vals), hi = Math.max(...vals);
     const step = (hi - lo) > 1500000 ? 500000 : (hi - lo) > 900000 ? 250000 : (hi - lo) > 400000 ? 100000 : 50000;
@@ -456,12 +481,13 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
   }
 
   function updateModel() {
-    const p = { speed: ctl.speed.value / 100, churn: ctl.churn.value / 100, rec: +ctl.rec.value, lag: +ctl.lag.value, rate: ctl.rate.value / 100 };
+    const p = { speed: ctl.speed.value / 100, churn: ctl.churn.value / 100, rec: +ctl.rec.value, lag: +ctl.lag.value, rate: ctl.rate.value / 100, extra: +ctl.extra.value };
     $("o-speed").textContent = ctl.speed.value + "%";
     $("o-churn").textContent = (+ctl.churn.value).toFixed(2) + "%";
     $("o-rec").textContent = fmt(p.rec);
     $("o-lag").textContent = p.lag ? p.lag + (p.lag === 1 ? " month" : " months") : "none";
     $("o-rate").textContent = (+ctl.rate.value).toFixed(1) + "%";
+    $("o-extra").textContent = p.extra ? fmt(p.extra) + "/mo" : "none";
     const R = raiseNeeded(p);
     if (R == null) { $("v-raise").textContent = "Over US$1M"; return; }
     const rows = operations(p), f = financed(rows, R, p.rate), slow = financed(operations({ ...p, speed: p.speed * 0.7 }), R, p.rate);
@@ -476,14 +502,14 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
     $("k-raise").className = "kpi " + (R <= 150000 ? "ok" : "warn");
     $("k-be").className = "kpi " + (!be ? "bad" : be <= 18 ? "ok" : "warn");
     $("k-split").className = "kpi"; $("k-pay").className = "kpi";
-    drawChart(f.cash, slow.cash);
-    $("years").innerHTML = f.yr.map((y, i) => `<tr><td>Year ${i + 1}</td><td class="r">${Math.round(y.clients)}</td><td class="r">${fmt(y.rev)}</td><td class="r">${fmt(y.ebitda)}</td><td class="r">${fmt(y.interest)}</td><td class="r">${fmt(y.tax)}</td><td class="r">${fmt(y.ebitda - y.interest - y.tax)}</td><td class="r muted">${fmt(PLAN_EBITDA[i])}</td></tr>`).join("");
+    drawChart(f.cash, slow.cash, p.extra);
+    $("years").innerHTML = f.yr.map((y, i) => `<tr><td>Year ${i + 1}</td><td class="r">${Math.round(y.clients)}</td><td class="r">${fmt(y.rev)}</td><td class="r">${fmt(y.ebitda)}</td><td class="r">${fmt(y.interest)}</td><td class="r">${fmt(y.bonus)}</td><td class="r">${fmt(y.tax)}</td><td class="r">${fmt(y.ebitda - y.interest - y.bonus - y.tax)}</td><td class="r muted">${fmt(PLAN_EBITDA[i])}</td></tr>`).join("");
     const y3 = f.yr[2];
-    $("model-insight").innerHTML = `<strong>Read this before showing it to an investor or a bank.</strong> The raise falls from US$150,000 to <strong>${fmtK(R)}</strong> because the team costs ${fmt(TEAM)} a month instead of about US$14,000. But the plan's client numbers still assume analysts: about ${Math.round(y3.clients)} clients by year 3, at 8–10 clients per analyst. Two developers and the automation will not serve that many alone, so year-3 EBITDA of ${pct(y3.ebitda / y3.rev)} of revenue is the ceiling, not a forecast. Hire on signed clients (about one analyst per 8–10). From month 37 the director earns RD$300,000 a month (about ${fmt(300000 * 1.37 / FX)} with charges) and his 10% stake becomes 3%.`;
+    $("model-insight").innerHTML = `<strong>Approved Oct 10.</strong> The raise falls from US$150,000 to <strong>${fmtK(R)}</strong> because the team costs ${fmt(TEAM)} a month instead of about US$14,000 and the verified running costs are far below the plan's. The loan is in dollars and most prices are in dollars too, but salaries are in pesos: a stronger dollar helps, a weaker one hurts. Costs not priced yet (coworking, marketing) are at zero until you add them with the slider. Team rule: the third developer is the safety margin, and new people are hired as clients sign (about one per 8–10 clients), so the ${Math.round(y3.clients)} clients and ${pct(y3.ebitda / y3.rev)} EBITDA margin of year 3 will come down as the team grows. From month 37 the director earns RD$300,000 a month (about ${fmt(300000 * 1.37 / FX)} with charges) and his 10% in cuotas becomes 3%, as set in the partners' agreement.`;
   }
   const pct = (v) => Math.round(v * 100) + "%";
   Object.values(ctl).forEach((c) => c.addEventListener("input", updateModel));
-  $("reset").addEventListener("click", () => { ctl.speed.value = 100; ctl.churn.value = 1.5; ctl.rec.value = 1690; ctl.lag.value = 0; ctl.rate.value = 9; updateModel(); });
+  $("reset").addEventListener("click", () => { ctl.speed.value = 100; ctl.churn.value = 1.5; ctl.rec.value = 1714; ctl.lag.value = 0; ctl.rate.value = 6; ctl.extra.value = 0; updateModel(); });
   updateModel();
 
   // ---------- costs ----------

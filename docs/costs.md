@@ -10,7 +10,7 @@ Researched October 10, 2026. "Unconfirmed" means no official or current source w
 | ONAPI trade name | RD$4,315–4,775 | Renew every 10 years | Yes | No official 2026 fee schedule found. (unconfirmed) | https://www.dgii.gov.do/publicacionesOficiales/bibliotecaVirtual/contribuyentes/rnc/Documents/Como-formalizar-tu-negocio.pdf |
 | Cámara de Comercio, registro mercantil | RD$5,000 (capital RD$100k–500k) | RD$3,300 every 2 years | Yes | Fee scales with capital: RD$2,500 up to 100k, RD$8,000 to 1M. | https://camarasantodomingo.do/assets/documents/tarifario-registro-mercantil-2024.pdf |
 | DGII tax on incorporation | 1% of capital (min RD$1,000) | — | Yes | No legal minimum capital for an SRL; each cuota at least RD$100, fully paid at formation. | https://dgii.gov.do |
-| Lawyer and notary for the SRL | RD$15,000–65,000 | — | Yes | Market estimate. Include the partners' agreement for the director's cuotas. (unconfirmed) | https://cuantomecuesta.com/rd/constitucion-empresa-srl-sas/ |
+| Lawyer and notary for the SRL | RD$50,000 (confirmed by the founder) | — | Yes | Includes the partners' agreement for the director's cuotas. | https://cuantomecuesta.com/rd/constitucion-empresa-srl-sas/ |
 | RNC, TSS employer registration | Free | — | Yes | Through Formalízate. | https://dgii.gov.do/contribuyentesRegistrados/mipymes/Paginas/ventanillaUnica.aspx |
 | Ministerio de Trabajo staff register (DGT-3) | Small fee | Renew by Jan 15 each year | Yes | Due within 15 days of hiring. (unconfirmed) | https://presidencia.gob.do |
 | Municipal land-use permit | Only for your own office | — | No | A coworking space normally holds its own permits. (unconfirmed) | https://eldia.com.do/usos-de-suelo/ |
@@ -78,15 +78,28 @@ Researched October 10, 2026. "Unconfirmed" means no official or current source w
 
 | Item | One-time | Recurring | Before client 1 | Note | Source |
 | --- | --- | --- | --- | --- | --- |
-| SME loan interest | — | Average 13.5% (Apr 2026); Promipyme 12% | — | 9% is below market. A new company usually needs the director's personal guarantee. | https://eldinero.com.do |
+| SME loan interest | — | 6% dollar loan, secured by the founder (market average 13.5% in Apr 2026) | — | Ask for the full cost sheet: opening fee, credit life insurance, legal fees. | https://eldinero.com.do |
+
+## Hidden fees, included in the budget
+
+| Fee | In the budget |
+| --- | --- |
+| 15% withholding (Ley 30-26) on licenses and Claude API, plus the Power BI monthly-term premium | +US$65.20 per client a month |
+| 15% withholding on the company's foreign tools (partner package, Claude Team, GitHub, 1Password, Azure) | US$32 a month |
+| Renewals: Cámara de Comercio (RD$3,300 every 2 years), Ministerio de Trabajo register (yearly) | US$5 a month |
+| Profit sharing (Labor Code Art. 223): 10% of profit, max 45 days' salary per developer | up to US$2,767 a year |
+| Bank opening fee (estimate 1%) | US$420 once |
+| Severance and vacation reserve | inside the RD$41,060 per developer |
+
+Not added because they cost nothing in the end: the 1% asset tax (credited against income tax) and withholdings by government clients (cash timing only).
 
 ## Legal flags for the lawyer
 
-- An SRL cannot issue bonds (Ley 479-08, Art. 91; bonds are for SA and SAS). Give the director 10% in cuotas at incorporation with a partners' agreement (pacto de socios) that sets the change to 3% at year 3, or consider an SAS, which handles vesting more cleanly.
+- Decided: the director gets 10% in cuotas at incorporation, with a partners' agreement (pacto de socios) that changes it to 3% plus RD$300,000 a month at month 37. An SRL cannot issue bonds (Ley 479-08, Art. 91).
 - An SRL needs at least 2 partners (Art. 89).
 - Work cannot be counted as a capital contribution; cuotas must be fully paid at formation (Art. 92). Ask whether cuotas received for work are taxable income for the director.
 - An unpaid director who works full time could be seen as an employee. Document the arrangement.
 
-## Pricing recommendation
+## Approved prices (Oct 10, 2026)
 
 Keep the package prices. Raise the platform & security fee from US$139 to US$162.50: the real pen test and insurance (~US$12,700 a year over the first 10 clients) and hosting (~US$19 per client) cost about US$125 per client a month, plus the plan's 30% margin. Monthly totals with the 5% fee: Esencial US$947.63, Crecimiento US$1,567.13, Empresa US$3,268.13. License margin falls from 59% to about 47% after the monthly-term premium and the 15% withholding, still healthy.
